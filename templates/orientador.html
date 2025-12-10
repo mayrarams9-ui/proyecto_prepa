@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Orientador</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    body {
+      background-color: #f4f7fb;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* === Lateral === */
+    .col-auto.bg-dark {
+      position: fixed;
+      top: 0; left: 0;
+      width: 240px;
+      height: 100vh;
+      background-color: #2E343D !important; /* Azul institucional */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 1050;
+    }
+
+    .nav-link {
+      border-radius: 8px;
+      margin-bottom: 5px;
+      color: #fff !important;
+    }
+    .nav-link:hover { background-color: #3c4450 !important; }
+
+    .submenu {
+      position: absolute;
+      top: 0; left: 100%;
+      background-color: #2E343D;
+      min-width: 200px;
+      display: none;
+      z-index: 1000;
+      border-radius: 0.25rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .submenu a {
+      color: #fff;
+      display: block;
+      padding: 8px 12px;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .submenu a:hover { background-color: #343a40; }
+    .nav-item.position-relative:hover > .submenu { display: block; }
+
+    .col.p-0 { margin-left: 240px; }
+
+    header {
+      background: #fff;
+      border-bottom: 4px solid #2E343D;
+    }
+
+    /* === Tablas personalizadas === */
+    .table-custom {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    }
+
+    .table-custom thead {
+      background-color: #2E343D;
+      color: #fff;
+    }
+
+    .table-custom th {
+      font-weight: 600;
+      text-align: center;
+      vertical-align: middle;
+      padding: 10px;
+      border-color: #444 !important;
+    }
+
+    .table-custom td {
+      text-align: center;
+      vertical-align: middle !important;
+      border-color: #ddd !important;
+      padding: 10px;
+      font-size: 0.95rem;
+    }
+
+    .table-custom tbody tr:hover {
+      background-color: #f2f4f8;
+      transition: background-color 0.2s;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-lg-custom { max-width: 900px; }
+    .modal-body {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .card {
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+    }
+
+    .accordion-button:not(.collapsed) {
+      background-color: #e9ecef;
+      font-weight: 600;
+    }
+
+    .badge {
+      font-size: 0.8rem;
+      padding: 6px 10px;
+    }
+
+    /* === Cerrar sesión blanco === */
+    .nav-link.text-white i,
+    .nav-link.text-white {
+      color: #fff !important;
+    }
+
+
+    /* === Modal con color del menú === */
+    .modal-content {
+      border-radius: 10px;
+      overflow: hidden;
+      border: none;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+    }
+
+    .modal-header {
+      background-color: #2E343D !important; /* Azul igual al menú */
+      color: #fff !important;
+      border-bottom: 3px solid #E1C933; /* Línea dorada sutil */
+    }
+
+    .modal-title i {
+      color: #E1C933; /* Icono dorado */
+    }
+
+    .btn-close-white {
+      filter: invert(1) grayscale(100%) brightness(200%);
+    }
+  </style>
+</head>
+
+<body>
+<div class="container-fluid">
+  <div class="d-flex">
+    <!-- MENÚ LATERAL -->
+    <div class="col-auto col-md-3 col-lg-2 bg-dark d-flex flex-column p-0">
+      <div class="text-center py-4 border-bottom">
+        <img src="{{ url_for('static', filename='images/logo_prepa_dorado.png') }}" class="img-fluid rounded" style="max-width:90px;">
+      </div>
+
+      <nav class="nav flex-column mt-3 px-2 position-relative">
+        <div class="nav-item position-relative">
+          <a href="#" class="nav-link text-white d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-people me-2"></i> Grupos</span><i class="bi bi-caret-right-fill"></i>
+          </a>
+          <div class="submenu">
+            {% for g in grupos %}
+              <a href="#" class="grupo-link" data-id="{{ g.id_grupo }}">{{ g.nombre_grado }} - {{ g.nombre_grupo }}</a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <hr class="border-secondary">
+        <a href="{{ url_for('logout') }}" class="nav-link text-white text-start px-3">
+          <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+        </a>
+      </nav>
+
+      <div class="mt-auto text-center text-white small py-3 border-top">
+        Bienvenido(a), <strong>{{ nombre }}</strong>
+      </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="col p-0">
+      <header class="py-3 px-4 shadow-sm text-center">
+        <h4 class="mb-0">PANEL DE ORIENTADOR — {{ nombre }}</h4>
+      </header>
+
+      <main class="p-4" id="contenidoPrincipal">
+        <div class="text-center mt-5">
+          <h5 class="text-secondary">Selecciona un grupo para ver el seguimiento</h5>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE DE MATERIA -->
+<div class="modal fade" id="modalMateria" tabindex="-1" aria-labelledby="modalMateriaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-lg-custom modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalMateriaLabel">
+          <i class="bi bi-journal-text me-2"></i> Trabajos por materia
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modalContenido"></div>
+    </div>
+  </div>
+</div>
+
+<!-- === Scripts === -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+let grupoActivo = null;
+
+$(function(){
+
+  // === Cargar estudiantes del grupo ===
+  $(document).on('click', '.grupo-link', function(e){
+    e.preventDefault();
+    const id = $(this).data('id');
+    const nombreGrupo = $(this).text(); 
+    grupoActivo = id;
+
+    fetch(`/panel_orientador/grupo/${id}`).then(r=>r.json()).then(data=>{
+      if(data.status!=='success')return;
+
+      if(data.rezagos>0){
+        const nombres = data.rezagos_list.join('<br>• ');
+        Swal.fire({
+          icon:'warning',
+          title:`${data.rezagos} estudiante(s) en rezago`,
+          html:`<div class="text-start"><strong>• ${nombres}</strong></div>`,
+          showConfirmButton:true,
+          confirmButtonText:'Cerrar',
+          confirmButtonColor:'#2E343D'
+        });
+      }
+
+      // === Encabezado ===
+      let html = `
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+          <h5 class="fw-semibold text-dark mb-2">Grupo ${nombreGrupo}</h5>
+          <div class="input-group shadow-sm" style="max-width: 300px;">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" id="buscarEstudiante" class="form-control border-start-0" placeholder="Buscar estudiante...">
+          </div>
+        </div>
+
+        <div class="table-responsive fade-in">
+        <table class="table table-bordered align-middle text-center table-custom" id="tablaEstudiantes">
+        <thead><tr><th>N.P.</th><th>Nombre</th><th>Estado</th><th>Detalle</th></tr></thead><tbody>`;
+
+      if(!data.estudiantes.length){
+        html+=`<tr><td colspan="4" class="text-muted">No hay estudiantes en este grupo.</td></tr>`;
+      } else {
+        data.estudiantes.forEach((e,i)=>{
+          html+=`<tr>
+            <td>${i+1}</td>
+            <td class="text-start">${e.nombre_completo}</td>
+            <td><span class="badge bg-${e.color}">${e.estado}</span></td>
+            <td><button class="btn btn-outline-dark btn-sm ver-detalle" data-id="${e.id_estudiante}" data-grupo="${id}">
+              <i class="bi bi-search"></i></button></td>
+          </tr>`;
+        });
+      }
+
+      html+=`</tbody></table></div>`;
+      $('#contenidoPrincipal').html(html);
+    });
+  });
+
+  // === Buscador dinámico ===
+  $(document).on('input', '#buscarEstudiante', function(){
+    const valor = $(this).val().toLowerCase().trim();
+    $('#tablaEstudiantes tbody tr').each(function(){
+      const texto = $(this).text().toLowerCase();
+      $(this).toggle(texto.includes(valor));
+    });
+  });
+
+  // === Ver materias del estudiante ===
+  $(document).on('click', '.ver-detalle', function(){
+    const idE = $(this).data('id');
+    const idG = $(this).data('grupo');
+
+    fetch(`/panel_orientador/estudiante/${idE}/${idG}`).then(r=>r.json()).then(resp=>{
+      if(resp.status!=='success')return;
+
+      let html=`<button class="btn btn-outline-secondary mb-3" id="volverGrupo">
+      <i class="bi bi-arrow-left"></i> Volver</button>
+      <div class="fade-in">
+      <table class="table table-bordered align-middle text-center table-custom">
+      <thead><tr><th>Materia</th><th>Trabajos</th><th>Entregados</th><th>Pendientes</th><th>Estado</th><th>Ver</th></tr></thead><tbody>`;
+
+      Object.values(resp.materias).forEach(m=>{
+        const parciales = m.trabajos_por_parcial || {};
+        const total = Object.values(parciales).flat().length;
+        const entregados = Object.values(parciales).flat().filter(t=>t.entregado||t.justificado||t.suspension).length;
+        const pendientes = total - entregados;
+
+        html+=`<tr>
+          <td class="text-start">${m.nombre}</td>
+          <td>${total}</td>
+          <td>${entregados}</td>
+          <td>${pendientes}</td>
+          <td><span class="badge bg-${m.color}">${m.estado}</span></td>
+          <td><i class="bi bi-eye text-dark ver-materia" data-nombre="${m.nombre}" data-idest="${idE}" data-idg="${idG}" style="cursor:pointer;"></i></td>
+        </tr>`;
+      });
+
+      html+=`</tbody></table></div>`;
+      $('#contenidoPrincipal').html(html);
+    });
+  });
+
+  // === Volver a lista de estudiantes ===
+  $(document).on('click', '#volverGrupo', function(){
+    $(`.grupo-link[data-id="${grupoActivo}"]`).trigger('click');
+  });
+
+  // === Modal con acordeones ===
+  $(document).on('click', '.ver-materia', function(){
+    const nombre = $(this).data('nombre');
+    const idE = $(this).data('idest');
+    const idG = $(this).data('idg');
+
+    $('#modalContenido').html('<div class="text-center py-5 text-secondary"><div class="spinner-border text-dark"></div><br>Cargando trabajos...</div>');
+    const modal = new bootstrap.Modal(document.getElementById('modalMateria'));
+    modal.show();
+
+    fetch(`/panel_orientador/estudiante/${idE}/${idG}`).then(r=>r.json()).then(resp=>{
+      if(resp.status!=='success')return;
+      const materia = resp.materias[nombre];
+      if(!materia)return;
+
+      let html = `<h5 class="fw-semibold mb-3 text-dark">${materia.nombre}</h5>
+      <div class="accordion" id="acParciales">`;
+
+      Object.entries(materia.trabajos_por_parcial).forEach(([parcial, lista], i)=>{
+        const idCollapse = `p${i}`;
+        html += `
+          <div class="accordion-item mb-2">
+            <h2 class="accordion-header" id="h${idCollapse}">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${idCollapse}">
+                ${parcial} Parcial (${lista.length} trabajo${lista.length!==1?'s':''})
+              </button>
+            </h2>
+            <div id="${idCollapse}" class="accordion-collapse collapse" data-bs-parent="#acParciales">
+              <div class="accordion-body">`;
+
+        if(lista.length === 0){
+          html += `<div class="text-center text-muted py-2">Sin trabajos registrados en este parcial</div>`;
+        } else {
+          html += `<div class="table-responsive">
+                    <table class="table table-bordered table-sm text-center align-middle table-custom mb-0">
+                      <thead>
+                        <tr>
+                          <th>Semana</th><th>Título</th><th>Valor</th><th>Calificación</th><th>Entregado</th><th>Observación</th>
+                        </tr>
+                      </thead>
+                      <tbody>`;
+          lista.forEach(t=>{
+            const cal = t.calificacion!==null?parseFloat(t.calificacion).toFixed(1):'—';
+            const ent = t.entregado?'<i class="bi bi-check-circle text-success"></i>':'<i class="bi bi-x-circle text-danger"></i>';
+            html += `<tr>
+              <td>${t.semana||''}</td>
+              <td>${t.titulo||''}</td>
+              <td>${t.valor_maximo||''}</td>
+              <td>${cal}</td>
+              <td>${ent}</td>
+              <td>${t.observacion||''}</td>
+            </tr>`;
+          });
+          html += `</tbody></table></div>`;
+        }
+
+        html += `</div></div></div>`;
+      });
+
+      html += `</div>`;
+      $('#modalContenido').html(html);
+    });
+  });
+
+});
+</script>
+
+</body>
+</html>

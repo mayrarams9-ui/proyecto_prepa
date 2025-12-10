@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Docente</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+  /* === 🎨 BASE === */
+  body {
+    background-color: #f4f7fb;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  /* === 🧭 MENÚ LATERAL FIJO === */
+  .col-auto.bg-dark {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    background-color: #2E343D !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: visible; /* ✅ permite que el submenú se muestre sin scroll en el principal */
+    z-index: 1050;
+  }
+
+  /* === 📑 ENLACES DEL MENÚ === */
+  .nav-link {
+    border-radius: 8px;
+    margin-bottom: 5px;
+  }
+
+  .nav-link:hover {
+    background-color: #3c4450 !important;
+  }
+
+  /* === 🔹 SUBMENÚ LATERAL CON SCROLL === */
+  .submenu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    background-color: #2E343D;
+    min-width: 200px;
+    max-height: 70vh;
+    overflow-y: auto; /* 🔹 scroll solo dentro del submenú */
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    display: none;
+    z-index: 2000;
+  }
+
+  .submenu a {
+    color: #fff;
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+
+  .submenu a:hover {
+    background-color: #343a40;
+  }
+
+  .nav-item.position-relative:hover > .submenu {
+    display: block;
+  }
+
+  /* Scroll discreto en el submenú */
+  .submenu::-webkit-scrollbar {
+    width: 6px;
+  }
+  .submenu::-webkit-scrollbar-thumb {
+    background-color: #666;
+    border-radius: 10px;
+  }
+
+  /* === 🧾 CONTENIDO PRINCIPAL === */
+  .col.p-0 {
+    margin-left: 240px;
+  }
+
+  header {
+    background-color: #ffffff;
+    color: #2E343D;
+    border-bottom: 4px solid #2E343D;
+  }
+
+  main {
+    background-color: #e9f0f8;
+    min-height: 100vh;
+  }
+
+  .card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background-color: #ffffff;
+  }
+
+  .btn-success, .btn-primary {
+    background-color: #2E343D;
+    border: none;
+  }
+
+  .btn-success:hover, .btn-primary:hover {
+    background-color: #3c4450;
+  }
+
+  /* === 🧮 TABLAS === */
+  .table thead th {
+    background-color: #f8f9fa !important;
+    color: #2E343D !important;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #999 #f1f1f1;
+  }
+
+  .table-responsive::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .table-responsive::-webkit-scrollbar-thumb {
+    background-color: #999;
+    border-radius: 10px;
+  }
+
+  /* === TOOLTIP CABECERAS DE TABLA === */
+  #tablaSeguimiento th {
+    white-space: normal !important;
+    word-wrap: break-word;
+    max-width: 160px;
+    text-align: center;
+    vertical-align: middle !important;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    background-color: #f8fafc !important;
+    border-bottom: 2px solid #dee2e6;
+    position: relative;
+    overflow: visible !important;
+  }
+
+  #tablaSeguimiento th span {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    padding-right: 15px;
+  }
+
+  #tablaSeguimiento th:hover::after {
+    content: attr(title);
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, 8px);
+    background: #2E343D;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    max-width: 260px;
+    white-space: normal;
+    text-align: center;
+    z-index: 9999;
+    opacity: 0;
+    animation: fadeIn 0.25s forwards;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, 0); }
+    to { opacity: 1; transform: translate(-50%, 8px); }
+  }
+  </style>
+</head>
+
+<body>
+<div class="container-fluid">
+  <div class="d-flex">
+    <!-- MENÚ LATERAL -->
+    <div class="col-auto col-md-3 col-lg-2 bg-dark d-flex flex-column min-vh-100 p-0">
+      <div class="text-center py-4 border-bottom">
+        <img src="{{ url_for('static', filename='images/logo_prepa_dorado.png') }}"
+             class="img-fluid rounded" style="max-width: 90px;">
+      </div>
+
+      <nav class="nav flex-column mt-3 px-2 position-relative">
+        <div class="nav-item position-relative">
+          <a href="#" class="nav-link text-white d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-people me-2"></i> Grupos</span><i class="bi bi-caret-right-fill"></i>
+          </a>
+          <div class="submenu">
+            {% for grupo in data.grupos %}
+              <a href="#" class="grupo-link"
+                data-id-asignacion="{{ grupo.id_asignacion }}"
+                data-id-grupo="{{ grupo.id_grupo }}"
+                data-nombre="{{ grupo.nombre_grado }} - {{ grupo.nombre_grupo }}"
+                data-materia="{{ grupo.nombre_materia }}">
+                {{ grupo.nombre_grado }} - {{ grupo.nombre_grupo }} ({{ grupo.nombre_materia }})
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="nav-item position-relative">
+          <a href="#" class="nav-link text-white d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-clipboard-check me-2"></i> Seguimiento</span><i class="bi bi-caret-right-fill"></i>
+          </a>
+          <div class="submenu">
+            {% for grupo in data.grupos %}
+              <a href="#" class="seguimiento-link"
+                data-id-asignacion="{{ grupo.id_asignacion }}"
+                data-nombre="{{ grupo.nombre_grado }} - {{ grupo.nombre_grupo }}">
+                {{ grupo.nombre_grado }} - {{ grupo.nombre_grupo }} ({{ grupo.nombre_materia }})
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <hr class="border-secondary">
+        <a href="{{ url_for('logout') }}" class="nav-link text-white text-start px-3">
+          <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+        </a>
+      </nav>
+
+      <div class="mt-auto text-center text-white small py-3 border-top">
+        Bienvenido(a), <strong>{{ nombre }}</strong>
+      </div>
+    </div>
+
+    <!--CONTENIDO PRINCIPAL -->
+    <div class="col p-0">
+      <header class="py-3 px-4 shadow-sm text-center">
+        <h4 class="mb-0">PANEL DE DOCENTE — {{ nombre }}</h4>
+      </header>
+      <main class="p-4" id="contenidoPrincipal">
+        <div class="text-center mt-5">
+          <h5 class="text-secondary">Selecciona un grupo para ver o asignar trabajos</h5>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- MODAL ELIMINAR -->
+<div class="modal fade" id="modalEliminarTrabajo" tabindex="-1" aria-labelledby="modalEliminarTrabajoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="modalEliminarTrabajoLabel"><i class="bi bi-trash3 me-2"></i>Eliminar trabajo</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formEliminarTrabajo" class="p-3">
+        <div class="modal-body">
+          <label class="form-label fw-semibold">Selecciona el trabajo a eliminar:</label>
+          <select id="selectTrabajoEliminar" class="form-select" required>
+            <option value="">Selecciona...</option>
+          </select>
+          <p class="mt-3 text-danger small mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i>
+            Esta acción eliminará todas las calificaciones y entregas asociadas. No se puede deshacer.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const estudiantesPorGrupo = JSON.parse('{{ data.estudiantes | tojson | safe }}');
+
+  // === GRUPOS ===
+  $(document).on('click', '.grupo-link', function(e){
+    e.preventDefault();
+    const idAsignacion = $(this).data('id-asignacion');
+    const idGrupo = Number($(this).data('id-grupo'));
+    const nombreGrupo = $(this).data('nombre');
+    const materia = $(this).data('materia');
+
+    let html = `
+      <h5 class="mb-4 fw-semibold text-dark">
+        Grupo: ${nombreGrupo} <br>
+        <small class="text-secondary">Materia: ${materia}</small>
+      </h5>
+      <div class="card mb-4"><div class="card-body">
+        <form id="formTrabajo" class="row g-3">
+          <div class="col-md-2"><label class="form-label">Semana</label><input type="number" class="form-control" name="semana" required></div>
+          <div class="col-md-3"><label class="form-label">Inicio</label><input type="date" class="form-control" name="periodo_inicio" required></div>
+          <div class="col-md-3"><label class="form-label">Fin</label><input type="date" class="form-control" name="periodo_fin" required></div>
+          <div class="col-md-2">
+            <label class="form-label">Parcial</label>
+            <select class="form-select" name="parcial" required>
+              <option value="">Seleccionar</option>
+              <option value="Primero">Primero</option>
+              <option value="Segundo">Segundo</option>
+              <option value="Tercero">Tercero</option>
+            </select>
+          </div>
+          <div class="col-md-2"><label class="form-label">Valor máx.</label><input type="number" step="0.1" class="form-control" name="valor_maximo" required></div>
+          <div class="col-12"><label class="form-label">Título</label><input type="text" class="form-control" name="titulo" required></div>
+          <div class="col-12 text-end mt-3"><button type="submit" class="btn btn-success px-4">Asignar</button></div>
+        </form>
+      </div></div>
+      <div id="tablaEstudiantes"></div>`;
+    $('#contenidoPrincipal').html(html);
+
+    // === CREAR TRABAJO ===
+    $('#formTrabajo').on('submit', function(ev){
+      ev.preventDefault();
+      const fd = new FormData(this);
+      fetch(`/crear_trabajo/${idAsignacion}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(Object.fromEntries(fd))
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'success') {
+          const idTrabajo = data.id_trabajo;
+          const lista = data.estudiantes;
+
+          let tabla = `
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <h6 class="mt-3 mb-0">Entrega habilitada</h6>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="semanaSuspendida">
+                  <label class="form-check-label text-danger fw-semibold" for="semanaSuspendida">Semana suspendida</label>
+                </div>
+              </div>
+              <input type="text" id="buscadorGrupo" placeholder="Buscar estudiante..." class="form-control form-control-sm" style="max-width:300px;">
+            </div>
+            <div class="table-responsive"><table class="table table-bordered align-middle text-center" id="tablaGrupo">
+            <thead class="table-dark"><tr><th>N.P.</th><th>Estudiante</th><th>Exp</th><th>Entregado</th><th>Calificación</th><th>Justificado</th></tr></thead><tbody>`;
+
+          lista.forEach((e,i)=>{
+            tabla += `<tr data-id="${e.id_estudiante}">
+              <td>${i+1}</td><td>${e.nombre} ${e.apellido_paterno} ${e.apellido_materno}</td>
+              <td>${e.exp || ''}</td>
+              <td><input type="checkbox" checked></td>
+              <td><input type="number" class="form-control form-control-sm" value="${fd.get('valor_maximo')}"></td>
+              <td><input type="checkbox" class="chkJustificado"></td></tr>`;
+          });
+
+          tabla += `</tbody></table></div>
+          <div class="mt-4 text-end d-flex justify-content-end gap-2">
+            <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalCargaMasiva">
+              Carga masiva
+            </button>
+
+            <button class="btn btn-primary" id="guardarCalificaciones">
+            Guardar Calificaciones
+            </button>
+          </div>
+          `;  
+        tabla += `
+          <textarea id="inputCalificaciones" class="d-none"></textarea>
+          <button id="btnCargarMasivo" class="d-none"></button>
+          `;
+          $('#tablaEstudiantes').html(tabla);
+
+// === CARGA MASIVA ORIGINAL ===
+          $(document).off('click', '#btnCargarMasivo').on('click', '#btnCargarMasivo', function() {
+            let texto = $('#inputCalificaciones').val();
+            if (!texto.trim()) {
+              return Swal.fire({
+                icon: 'warning',
+                title: 'Sin datos',
+                text: 'Pega las calificaciones antes de cargar.',
+                confirmButtonColor: '#2E343D'
+              });
+            }
+
+  texto = texto.replace(/\r\n/g, '\n'); 
+  const valores = texto.split(/[\n,]/).map(v => v.trim());
+
+  $('#tablaGrupo tbody tr').each(function(index) {
+    const valorTexto = valores[index] ?? "";
+    const inputCal = $(this).find('input[type="number"]');
+    const checkEntrega = $(this).find('input[type="checkbox"]').first();
+    const chkJustificado = $(this).find('.chkJustificado');
+
+    if (/just/i.test(valorTexto)) {
+      chkJustificado.prop('checked', true);
+      checkEntrega.prop('checked', true);
+      inputCal.val('');
+    } else if (valorTexto === "" || /^\s*$/.test(valorTexto)) {
+      chkJustificado.prop('checked', false);
+      checkEntrega.prop('checked', false);
+      inputCal.val(0);
+    } else {
+      const valorNum = parseFloat(valorTexto);
+      if (isNaN(valorNum)) {
+        chkJustificado.prop('checked', false);
+        checkEntrega.prop('checked', false);
+        inputCal.val(0);
+      } else {
+        chkJustificado.prop('checked', false);
+        checkEntrega.prop('checked', true);
+        inputCal.val(valorNum);
+      }
+    }
+  });
+
+  Swal.fire({
+    icon: 'success',
+    title: '¡Cargado!',
+    text: 'Las calificaciones se aplicaron correctamente (vacíos = 0).',
+    confirmButtonColor: '#2E343D'
+  });
+});
+
+
+
+          
+
+          // === BUSCADOR DE ESTUDIANTES (ASIGNAR TRABAJO) ===
+$(document).off('keyup', '#buscadorGrupo').on('keyup', '#buscadorGrupo', function () {
+    const texto = $(this).val().toLowerCase();
+    $('#tablaGrupo tbody tr').each(function () {
+        const nombre = $(this).find('td:eq(1)').text().toLowerCase();
+        $(this).toggle(nombre.includes(texto));
+    });
+});
+
+
+          // === Semana suspendida ===
+          $(document).off('change', '#semanaSuspendida').on('change', '#semanaSuspendida', function() {
+            const checked = $(this).is(':checked');
+            $('#tablaGrupo tbody tr').each(function() {
+              const checkEntrega = $(this).find('input[type="checkbox"]').first();
+              const chkJust = $(this).find('.chkJustificado');
+              const inputCal = $(this).find('input[type="number"]');
+              if (checked) {
+                checkEntrega.prop('checked', false).prop('disabled', true);
+                chkJust.prop('checked', false).prop('disabled', true);
+                inputCal.val('').prop('disabled', true).addClass('bg-light text-danger fw-semibold');
+              } else {
+                checkEntrega.prop('disabled', false);
+                chkJust.prop('disabled', false);
+                inputCal.prop('disabled', false).removeClass('bg-light text-danger fw-semibold');
+              }
+            });
+          });
+
+          
+
+          // === Guardar ===
+          $('#guardarCalificaciones').on('click', function(){
+            const resultados = [];
+            const suspension = $('#semanaSuspendida').prop('checked') ? 1 : 0;
+            $('#tablaGrupo tbody tr').each(function(){
+              resultados.push({
+                idTrabajo,
+                idEstudiante: $(this).data('id'),
+                entregado: $(this).find('input[type="checkbox"]').first().prop('checked') ? 1 : 0,
+                justificado: $(this).find('.chkJustificado').prop('checked') ? 1 : 0,
+                puntaje: $(this).find('input[type="number"]').val() || null,
+                suspension
+              });
+            });
+            fetch('/guardar_calificaciones', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify(resultados)
+            })
+            .then(r=>r.json())
+            .then(resp=>{
+              if(resp.status==='success'){
+                Swal.fire({icon:'success',title:'¡Guardado!',text:'Datos registrados correctamente.',confirmButtonColor:'#2E343D'})
+                .then(()=>{$(`.seguimiento-link[data-id-asignacion='${idAsignacion}']`).trigger('click');});
+              }
+            });
+          });
+        }
+      });
+    });
+  });
+
+  // === SEGUIMIENTO ===
+  $(document).on('click', '.seguimiento-link', function(e){
+    e.preventDefault();
+    const id = $(this).data('id-asignacion');
+    const nombre = $(this).data('nombre');
+    const materiaTexto = $(this).text();
+    const materia = materiaTexto.match(/\(([^)]+)\)/)?.[1] || 'Materia no especificada';
+
+    fetch(`/seguimiento/${id}`).then(r=>r.json()).then(data=>{
+      if(!data||!data.length){
+        $('#contenidoPrincipal').html(`<div class="alert alert-warning text-center mt-4">No hay trabajos registrados.</div>`);return;
+      }
+
+      const parciales={"Primero":[],"Segundo":[],"Tercero":[]};
+      data.forEach(row=>parciales[row.parcial]?.push(row));
+
+      let html=`
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="fw-semibold">Seguimiento — ${nombre} <small class="text-muted">(${materia})</small></h5>
+        <div class="d-flex gap-2">
+          <input type="text" id="buscadorSeguimiento" placeholder=" Buscar estudiante..." class="form-control form-control-sm" style="max-width:250px;">
+          <select id="selectorParcial" class="form-select form-select-sm" style="max-width:160px;">
+            <option value="Primero">Selecciona parcial</option>
+            <option value="Primero">Primero</option>
+            <option value="Segundo">Segundo</option>
+            <option value="Tercero">Tercero</option>
+          </select>
+          <button class="btn btn-danger btn-sm" id="btnAbrirEliminar"><i class="bi bi-trash3"></i></button>
+        </div>
+      </div>
+      <div id="tablaSeguimiento"></div>`;
+      $('#contenidoPrincipal').html(html);
+
+      mostrarParcial('Primero');
+      $('#selectorParcial').on('change',function(){mostrarParcial(this.value)});
+
+      function mostrarParcial(p){
+        const rows=parciales[p];
+        $('#selectTrabajoEliminar').html('<option value="">Selecciona...</option>');
+        const trabajosUnicos = {};
+        rows.forEach(r=>{
+          if(!trabajosUnicos[r.id_trabajo]){
+            trabajosUnicos[r.id_trabajo]=true;
+            $('#selectTrabajoEliminar').append(`<option value="${r.id_trabajo}">Semana ${r.semana} — ${r.titulo}</option>`);
+          }
+        });
+        if(!rows.length){
+          $('#tablaSeguimiento').html(`<div class="alert alert-info text-center">Sin trabajos en este parcial.</div>`);return;
+        }
+
+        const ests={},trabs=[];
+        rows.forEach(r=>{
+          if(!ests[r.id_estudiante])
+            ests[r.id_estudiante]={nombre:`${r.nombre} ${r.apellido_paterno} ${r.apellido_materno}`,entregas:{}};
+          const key=`Semana ${r.semana} - ${r.titulo}`;
+          ests[r.id_estudiante].entregas[key]={entregado:r.entregado,cal:r.calificacion,justificado:r.justificado,suspension:r.suspension};
+          if(!trabs.includes(key)) trabs.push(key);
+        });
+
+        let t=`<div class="table-responsive"><table class="table table-bordered text-center align-middle">
+        <thead class="table-dark"><tr><th>N.P.</th><th>Estudiante</th>`;
+        trabs.forEach(x=>t+=`<th title="${x}"><span>${x}</span></th>`); 
+        t+=`</tr></thead><tbody>`;
+
+        let i=1;
+        Object.values(ests).forEach(e=>{
+          t+=`<tr><td>${i++}</td><td class="text-start">${e.nombre}</td>`;
+          trabs.forEach(k=>{
+            const inf=e.entregas[k];
+            if(inf?.suspension){t+=`<td class="text-danger fw-semibold">Suspensión</td>`;}
+            else if(inf){
+              const calificacion = (inf.cal === null || inf.cal === undefined || inf.cal === '' || isNaN(inf.cal))
+              ? '0.00'
+              : parseFloat(inf.cal).toFixed(2);
+              t += `<td>${inf.entregado ? '' : ''} ${inf.justificado ? '(Justificado)' : ''} ${calificacion}</td>`;
+              }
+
+            else t+=`<td>-</td>`;
+          });
+          t+=`</tr>`;
+        });
+        t+=`</tbody></table></div>`;
+        $('#tablaSeguimiento').html(t);
+
+        // Buscador
+        $('#buscadorSeguimiento').on('keyup',function(){
+          const txt=this.value.toLowerCase();
+          $('#tablaSeguimiento tbody tr').each(function(){
+            const nom=$(this).find('td:eq(1)').text().toLowerCase();
+            $(this).toggle(nom.includes(txt));
+          });
+        });
+      }
+
+      $('#btnAbrirEliminar').on('click',()=>$('#modalEliminarTrabajo').modal('show'));
+
+      // Eliminar trabajo
+      $('#formEliminarTrabajo').off('submit').on('submit',function(e){
+        e.preventDefault();
+        const idTrabajo=$('#selectTrabajoEliminar').val();
+        if(!idTrabajo)return;
+        Swal.fire({
+          title:'¿Eliminar trabajo?',
+          text:'Se eliminará junto con sus calificaciones.',
+          icon:'warning',
+          showCancelButton:true,
+          confirmButtonText:'Sí, eliminar',
+          cancelButtonText:'Cancelar',
+          confirmButtonColor:'#d33'
+        }).then(res=>{
+          if(res.isConfirmed){
+            fetch(`/eliminar_trabajo/${idTrabajo}`,{method:'DELETE'})
+            .then(r=>r.json())
+            .then(resp=>{
+              if(resp.status==='success'){
+                Swal.fire({icon:'success',title:'Eliminado',text:'El trabajo fue borrado.',confirmButtonColor:'#2E343D'})
+                .then(()=>location.reload());
+              }
+            });
+          }
+        });
+      });
+    });
+  });
+
+// === MODAL → APLICAR CARGA MASIVA ===
+$(document).on('click', '#btnAplicarCargaModal', function () {
+
+  const texto = $('#inputCalificacionesModal').val();
+
+  if (!texto.trim()) {
+    return Swal.fire({
+      icon: 'warning',
+      title: 'Sin datos',
+      text: 'Pega las calificaciones antes de aplicar.'
+    });
+  }
+
+  // Pasar texto del modal → textarea oculto
+  $('#inputCalificaciones').val(texto);
+
+  // Cerrar modal
+  $('#modalCargaMasiva').modal('hide');
+
+  // Usar la función ORIGINAL de carga masiva
+  $('#btnCargarMasivo').trigger('click');
+});
+
+});
+</script>
+
+
+<!-- MODAL CARGA MASIVA -->
+<div class="modal fade" id="modalCargaMasiva" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title"><i class="bi bi-upload me-2"></i> Carga masiva de calificaciones</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p>Pega aquí las calificaciones (una por línea o separadas por comas):</p>
+        <textarea id="inputCalificacionesModal" class="form-control" style="height: 200px;"></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-dark" id="btnAplicarCargaModal">Aplicar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

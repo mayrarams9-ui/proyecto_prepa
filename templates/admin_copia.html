@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Administrador</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    /* ============================
+       ESTILOS BASE PROFESIONALES
+    ============================ */
+    body {
+      background-color: #f5f7fb;
+      font-family: 'Segoe UI', sans-serif;
+      color: #2E343D;
+    }
+
+    
+    /* ----- Sidebar ----- */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 100vh;
+      background-color: #2E343D;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 1050;
+      padding: 0;
+    }
+
+    .sidebar .logo {
+      text-align: center;
+      padding: 1.2rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar .logo img {
+      width: 90px;
+      border-radius: 10px;
+    }
+
+    .sidebar .nav-link {
+      color: #fff !important;
+      border-radius: 8px;
+      margin: 4px 10px;
+      transition: background 0.2s;
+    }
+
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      background-color: #3c4450 !important;
+    }
+
+    .sidebar .bottom {
+      color: #ccc;
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.9rem;
+    }
+
+    /* ----- Main content ----- */
+    .main-content {
+      margin-left: 240px;
+      background-color: #f5f7fb;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #ffffff;
+      color: #2E343D;
+      border-bottom: 4px solid #2E343D;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    main {
+      padding: 2rem;
+    }
+
+    /* ----- Cards Dashboard ----- */
+    .stat-card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease;
+      background-color: #fff;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    .stat-card:hover { transform: translateY(-4px); }
+    .stat-card h6 { font-weight: 600; color: #2E343D; }
+    .stat-value { font-size: 2rem; font-weight: 700; color: #2E343D; }
+
+    /* ----- Modales base ----- */
+    .modal-content {
+      border-radius: 14px;
+      border: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      animation: fadeSlide 0.4s ease;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      background-color: #2E343D;
+      color: #fff;
+      border-top-left-radius: 14px;
+      border-top-right-radius: 14px;
+      border-bottom: none;
+    }
+
+    .modal-title i {
+      margin-right: 8px;
+    }
+
+    .form-control, .form-select {
+      border-radius: 10px;
+      border: 1px solid #ced4da;
+      padding: 10px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #2E343D;
+      box-shadow: 0 0 0 0.2rem rgba(46, 52, 61, 0.25);
+    }
+
+    .btn-dark {
+      background-color: #2E343D;
+      border: none;
+      border-radius: 10px;
+    }
+
+    .btn-dark:hover {
+      background-color: #3a414d;
+    }
+
+    .btn-danger {
+      border-radius: 10px;
+    }
+
+    /* Avatar circular */
+    .avatar-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #e9ecef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem auto;
+      font-size: 2rem;
+      color: #2E343D;
+    }
+
+    /* Tabla usuarios */
+    .table thead th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      border-bottom: 2px solid #dee2e6;
+    }
+    .table tbody tr:hover {
+      background-color: #f1f3f5;
+      transition: 0.2s;
+    }
+
+    .table-custom thead {
+  background-color: #2E343D !important;
+  color: #fff !important;
+}
+
+/* ============================
+   Encabezado oscuro solo para tabla de estudiantes
+============================ */
+.tabla-estudiantes thead {
+  background-color: #2E343D !important;
+  color: #fff !important;
+}
+
+.tabla-estudiantes th {
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
+  letter-spacing: 0.03em;
+
+}
+
+.tabla-estudiantes td {
+  vertical-align: middle !important;
+}
+/* === Alinear todo el texto de las tablas a la derecha === */
+.table td, .table th {
+  text-align:left !important;
+}
+
+/* === Excepciones: Centrar botones o iconos === */
+/* Excepciones: centrar columnas con botones o íconos */
+.table td.acciones,
+.table th.acciones,
+.table td.detalle,
+.table th.detalle {
+  text-align: center !important;
+}
+
+.modal-backdrop.show {
+  opacity: 0.3 !important;
+}
+
+/* Centrar texto en la columna Sexo */
+.col-sexo {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* 🔹 Forzar centrado solo para la columna de sexo */
+.tabla-estudiantes td:nth-child(3),
+.tabla-estudiantes th:nth-child(3) {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+/* 🎨 Efectos visuales para validaciones */
+input.is-valid {
+  border-color: #28a745 !important;
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.4);
+}
+
+input.is-invalid {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 5px rgba(220, 53, 69, 0.4);
+}
+
+/* ==========================
+   OJITO DE CONTRASEÑA — VERSIÓN AJUSTADA
+========================== */
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 10px !important; /* deja espacio para el icono */
+  box-sizing: border-box;
+  height: auto; /* usa el alto natural del input */
+}
+
+
+.password-wrapper i {
+  position: absolute;
+  top: 50%;
+  right: 10px; /* más pegado al borde */
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: #6c757d;
+  background-color: #fff; /* fondo blanco para tapar palomita o X */
+  padding: 2px;
+  border-radius: 50%;
+  z-index: 15; /* 🔹 asegura que quede encima de todo (incluida la palomita) */
+}
+
+.password-wrapper i:hover {
+  color: #000;
+}
+
+
+
+
+  </style>
+</head>
+<body>
+
+<!-- =============================
+     SIDEBAR
+============================= -->
+<div class="sidebar">
+  <div class="logo">
+    <img src="{{ url_for('static', filename='images/logo_prepa_dorado.png') }}" alt="Logo">
+  </div>
+
+  <nav class="nav flex-column px-2">
+    <a href="{{ url_for('admin_dashboard') }}" class="nav-link btn btn-dark text-start">
+      <i class="bi bi-speedometer2 me-2"></i> Panel principal
+    </a>
+    <a href="#" id="menuDocentes" class="nav-link btn btn-dark text-start">
+      <i class="bi bi-person-badge me-2"></i> Docentes
+    </a>
+    <a href="#" id="menuEstudiantes" class="nav-link btn btn-dark text-start">
+      <i class="bi bi-people-fill me-2"></i> Estudiantes
+    </a>
+    <a href="#" id="menuOrientadores" class="nav-link btn btn-dark text-start">
+      <i class="bi bi-person-heart me-2"></i> Orientadores
+    </a>
+    <a href="#" id="menuAdministradores" class="nav-link btn btn-dark text-start">
+      <i class="bi bi-person-gear me-2"></i> Administradores
+    </a>
+    <a href="#"
+      class="nav-link btn btn-dark text-start"
+      data-bs-toggle="modal"
+      data-bs-target="#modalAsignarMateria">
+      <i class="bi bi-journal-bookmark me-2"></i> Asignar materias
+    </a>
+
+    <hr class="border-secondary">
+    <a href="{{ url_for('logout') }}" class="nav-link text-white-50 text-start px-3">
+      <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+    </a>
+  </nav>
+
+  <div class="bottom">
+    Bienvenido(a), <strong>{{ nombre }}</strong>
+  </div>
+</div>
+
+<!-- =============================
+     CONTENIDO PRINCIPAL
+============================= -->
+<div class="main-content">
+  <header class="py-3 px-4 shadow-sm text-center">
+  <h4 class="mb-0">PANEL DE ADMINISTRADOR — {{ nombre.upper() }}</h4>
+</header>
+
+  <main id="contenidoPrincipal">
+    <div class="row text-center mb-4">
+      <div class="col-md-3 mb-3">
+        <div class="stat-card">
+          <h6>Total de Estudiantes</h6>
+          <div class="stat-value">{{ data.total_estudiantes }}</div>
+          <i class="bi bi-person-fill text-secondary" style="font-size:2rem;"></i>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="stat-card">
+          <h6>Total de Docentes</h6>
+          <div class="stat-value">{{ data.total_docentes }}</div>
+          <i class="bi bi-person-badge-fill text-secondary" style="font-size:2rem;"></i>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="stat-card">
+          <h6>Total de Orientadores</h6>
+          <div class="stat-value">{{ data.total_orientadores }}</div>
+          <i class="bi bi-person-heart text-secondary" style="font-size:2rem;"></i>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="stat-card">
+          <h6>Total de Administradores</h6>
+          <div class="stat-value">{{ data.total_administradores }}</div>
+          <i class="bi bi-person-gear text-secondary" style="font-size:2rem;"></i>
+        </div>
+      </div>
+    </div>
+
+    <h5 class="fw-semibold mb-4 text-dark">Resumen por grupo</h5>
+<div class="row">
+  {% for grupo in data.estudiantes_por_grupo %}
+  <div class="col-md-4 mb-4">
+    <div class="card p-3 border-0 shadow-sm grupo-card" data-id="{{ grupo.id_grupo }}" style="cursor:pointer; transition:all .2s;">
+      <h6 class="fw-bold mb-1 text-dark">
+        <i class="bi bi-people-fill me-2 text-secondary"></i> {{ grupo.nombre_grupo }}
+      </h6>
+      <hr class="my-2">
+      <p class="mb-1"><strong>Total estudiantes:</strong> {{ grupo.total_estudiantes }}</p>
+      <p class="mb-1 text-danger"><strong>En rezago:</strong> {{ grupo.total_rezago }}</p>
+      <p class="mb-1 text-success"><strong>Excelencia:</strong> {{ grupo.total_excelencia }}</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+</main>
+
+<!-- 🔹 Script oculto con los datos de grupos (usado por Gestión de Estudiantes) -->
+<script type="application/json" data-grupos>
+  {{ data.estudiantes_por_grupo | tojson }}
+</script>
+
+
+
+<!-- =============================
+     MODALES BONITOS
+============================= -->
+
+<!-- 🔹 Modal Agregar Docente -->
+<div class="modal fade" id="modalAgregarDocente" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-person-plus"></i>Agregar Docente</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formAgregarDocente" class="p-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="nombre" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Apellido paterno</label>
+            <input type="text" name="apellido_paterno" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Apellido materno</label>
+            <input type="text" name="apellido_materno" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">CSP</label>
+            <input type="text" name="csp" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Correo institucional</label>
+            <input type="email" name="correo_institucional" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contraseña</label>
+            <div class="password-wrapper">
+              <input type="password" name="password" class="form-control" required>
+              <i class="bi bi-eye" onclick="togglePassword(this)"></i>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Confirmar contraseña</label>
+            <input type="password" name="confirmar_password" class="form-control" required>
+          </div>
+        </div>
+        <div class="text-end mt-4">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-dark">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 🔹 Modal Agregar Orientador -->
+<div class="modal fade" id="modalAgregarOrientador" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title"><i class="bi bi-person-heart me-2"></i> Agregar Orientador</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formAgregarOrientador" class="p-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="nombre" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Apellido paterno</label>
+            <input type="text" name="apellido_paterno" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Apellido materno</label>
+            <input type="text" name="apellido_materno" class="form-control" required>
+          </div>
+
+          <!-- 🔹 Campo CSP agregado -->
+          <div class="col-md-6">
+            <label class="form-label">CSP</label>
+            <input type="text" name="csp" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Correo institucional</label>
+            <input type="email" name="correo_institucional" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contraseña</label>
+            <div class="password-wrapper">
+              <input type="password" name="password" class="form-control" required>
+              <i class="bi bi-eye" onclick="togglePassword(this)"></i>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Confirmar contraseña</label>
+            <input type="password" name="confirmar_password" class="form-control" required>
+          </div>
+        </div>
+        <div class="text-end mt-4">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-dark">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 🔹 Modal Agregar Administrador -->
+<div class="modal fade" id="modalAgregarAdministrador" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title"><i class="bi bi-person-gear me-2"></i> Agregar Administrador</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formAgregarAdministrador" class="p-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="nombre" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Apellido paterno</label>
+            <input type="text" name="apellido_paterno" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Apellido materno</label>
+            <input type="text" name="apellido_materno" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">CSP</label>
+            <input type="text" name="csp" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Correo institucional</label>
+            <input type="email" name="correo_institucional" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contraseña</label>
+            <div class="password-wrapper">
+              <input type="password" name="password" class="form-control" required>
+              <i class="bi bi-eye" onclick="togglePassword(this)"></i>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Confirmar contraseña</label>
+            <input type="password" name="confirmar_password" class="form-control" required>
+          </div>
+        </div>
+        <div class="text-end mt-4">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-dark">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- 🔹 Modal Ver Usuario -->
+<div class="modal fade" id="modalVerUsuario" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-person-vcard"></i>Detalles del Usuario</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <div class="avatar-circle mb-3">
+          <i class="bi bi-person"></i>
+        </div>
+        <h5 id="verNombreUsuario" class="fw-bold mb-3"></h5>
+        <p><strong>Rol:</strong> <span id="verRolUsuario"></span></p>
+        <p><strong>Correo:</strong> <span id="verCorreoUsuario"></span></p>
+        <p><strong>CSP:</strong> <span id="verCspUsuario"></span></p>
+        <div id="verAsignaciones" class="mt-3 text-start"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🔹 Modal Editar Usuario -->
+<div class="modal fade" id="modalEditarUsuario" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-pencil-square"></i>Editar Usuario</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formEditarUsuario" class="p-4">
+        <input type="hidden" id="editarIdUsuario">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            <input type="text" id="editarNombre" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Apellido paterno</label>
+            <input type="text" id="editarApellidoPaterno" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Apellido materno</label>
+            <input type="text" id="editarApellidoMaterno" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">CSP</label>
+            <input type="text" id="editarCsp" class="form-control">
+          </div>
+          <div class="col-md-12">
+            <label class="form-label">Correo institucional</label>
+            <input type="email" id="editarCorreo" class="form-control" required>
+          </div>
+        </div>
+        <div class="text-end mt-4">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-dark">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 🔹 Modal Eliminar Usuario -->
+<div class="modal fade" id="modalEliminarUsuario" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow rounded-4">
+
+      <!-- Encabezado oscuro, igual que los demás -->
+      <div class="modal-header bg-dark text-white rounded-top-4">
+        <h5 class="modal-title fw-semibold">
+          <i class="bi bi-exclamation-triangle me-2 text-warning"></i> Confirmar eliminación
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Cuerpo -->
+      <div class="modal-body text-center py-4">
+        <i class="bi bi-trash3 text-danger" style="font-size:3rem;"></i>
+        <p class="mt-3 mb-2 fs-5">¿Seguro que deseas eliminar este usuario?</p>
+        <p class="fw-semibold text-dark mb-0" id="eliminarNombre">Nombre del usuario</p>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer border-0 d-flex justify-content-center">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i> Cancelar
+        </button>
+        <button type="button" id="btnConfirmarEliminar" class="btn btn-danger px-4">
+          <i class="bi bi-trash me-1"></i> Eliminar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- 🔹 Modal Asignar Materia -->
+<div class="modal fade" id="modalAsignarMateria" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow rounded-4">
+
+      <!-- Header igual que los demás -->
+      <div class="modal-header bg-dark text-white rounded-top-4">
+        <h5 class="modal-title fw-semibold">
+          <i class="bi bi-journal-bookmark me-2"></i> Asignar Materia a Docente
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Body -->
+      <form id="formAsignarMateria" class="modal-body p-4">
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label class="form-label">Grado</label>
+            <select id="selectGrado" name="id_grado" class="form-select" required>
+              <option value="">Seleccionar grado</option>
+              <option value="1">1°</option>
+              <option value="2">2°</option>
+              <option value="3">3°</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Materia</label>
+            <select id="selectMateria" name="id_materia" class="form-select" required>
+              <option value="">Seleccionar materia</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Grupo</label>
+            <select id="selectGrupo" name="id_grupo" class="form-select" required>
+              <option value="">Seleccionar grupo</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Docente</label>
+            <select id="id_docente" name="id_docente" class="form-select" required>
+              <option value="">Seleccionar docente</option>
+            </select>
+          </div>
+        </div>
+      </form>
+
+      <!-- Footer -->
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" form="formAsignarMateria" class="btn btn-dark">Asignar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 🔹 MODAL DETALLE DE MATERIA (IGUAL QUE ORIENTADOR) -->
+<div class="modal fade" id="modalMateria" tabindex="-1" aria-labelledby="modalMateriaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-lg-custom modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white border-bottom border-warning">
+        <h5 class="modal-title" id="modalMateriaLabel">
+          <i class="bi bi-journal-text me-2 text-warning"></i> Trabajos por materia
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modalContenido">
+        <!-- Aquí se carga dinámicamente el contenido -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- =======================================================
+     🔹 MODALES DE GESTIÓN DE ESTUDIANTES (SOLO AGREGADO)
+======================================================= -->
+
+<!-- Modal: Agregar Estudiante -->
+<div class="modal fade" id="modalAgregarEstudiante" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow rounded-4">
+      <div class="modal-header bg-dark text-white rounded-top-4">
+        <h5 class="modal-title fw-semibold">
+          <i class="bi bi-person-plus me-2"></i> Agregar Estudiante
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formAgregarEstudiante" class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label">Expediente</label>
+            <input type="text" name="exp" maxlength="20" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="nombre" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Apellido paterno</label>
+            <input type="text" name="apellido_paterno" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Apellido materno</label>
+            <input type="text" name="apellido_materno" class="form-control" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Sexo</label>
+            <select name="sexo" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <option value="H">H</option>
+              <option value="M">M</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">CURP</label>
+            <input type="text" name="curp" maxlength="20" class="form-control" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Teléfono</label>
+            <input type="text" name="telefono" maxlength="15" class="form-control" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Correo institucional</label>
+            <input type="email" name="correo_institucional" class="form-control" required>
+          </div>
+        </div>
+      </form>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" form="formAgregarEstudiante" class="btn btn-dark">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Editar Estudiante -->
+<div class="modal fade" id="modalEditarEstudiante" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow rounded-4">
+      <div class="modal-header bg-dark text-white rounded-top-4">
+        <h5 class="modal-title fw-semibold">
+          <i class="bi bi-pencil-square me-2"></i> Editar Estudiante
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formEditarEstudiante" class="modal-body p-4">
+        <input type="hidden" name="id_estudiante" id="editarIdEstudiante">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Nombre</label>
+            <input type="text" id="editarNombreEst" name="nombre" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Apellido paterno</label>
+            <input type="text" id="editarApellidoPaternoEst" name="apellido_paterno" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Apellido materno</label>
+            <input type="text" id="editarApellidoMaternoEst" name="apellido_materno" class="form-control" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Sexo</label>
+            <select id="editarSexoEst" name="sexo" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <option value="H">H</option>
+              <option value="M">M</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">CURP</label>
+            <input type="text" id="editarCurpEst" name="curp" maxlength="20" class="form-control">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Teléfono</label>
+            <input type="text" id="editarTelefonoEst" name="telefono" maxlength="15" class="form-control">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Correo institucional</label>
+            <input type="email" id="editarCorreoEst" name="correo_institucional" class="form-control" required>
+          </div>
+        </div>
+      </form>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" form="formEditarEstudiante" class="btn btn-dark">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Eliminar Estudiante -->
+<div class="modal fade" id="modalEliminarEstudiante" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow rounded-4">
+      <div class="modal-header bg-dark text-white rounded-top-4">
+        <h5 class="modal-title fw-semibold">
+          <i class="bi bi-exclamation-triangle text-warning me-2"></i> Confirmar eliminación
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <i class="bi bi-person-x text-danger" style="font-size:3rem;"></i>
+        <p class="mt-3 mb-2 fs-5">¿Seguro que deseas eliminar este estudiante?</p>
+        <p class="fw-semibold text-dark mb-0" id="nombreEliminarEst">Nombre del estudiante</p>
+      </div>
+      <div class="modal-footer border-0 d-flex justify-content-center">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="btnConfirmarEliminarEst" class="btn btn-danger">
+          <i class="bi bi-trash"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- FIN PARTE 2 -->
+<!-- =============================
+     SCRIPTS FINALES
+============================= -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+/* =========================
+   FUNCIONES AUXILIARES
+========================= */
+async function postJSON(url, payload) {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  return await res.json();
+}
+
+function showModal(id) {
+  const modal = new bootstrap.Modal(document.getElementById(id));
+  modal.show();
+}
+
+function hideModal(id) {
+  const modalEl = document.getElementById(id);
+  const modal = bootstrap.Modal.getInstance(modalEl);
+  if (modal) modal.hide();
+}
+
+
+/* =========================
+   🔄 Recargar tabla de usuarios por rol (sin recargar la página)
+========================= */
+async function recargarTablaUsuarios(rol) {
+  let url = '';
+  let titulo = '';
+
+  if (rol === 'docente') {
+    url = '/listar_docentes';
+    titulo = 'Docentes';
+  } else if (rol === 'orientador') {
+    url = '/listar_orientadores';
+    titulo = 'Orientadores';
+  } else if (rol === 'administrador') {
+    url = '/listar_administradores';
+    titulo = 'Administradores';
+  } else {
+    console.warn('⚠️ Rol no reconocido:', rol);
+    return;
+  }
+
+  try {
+    const res = await fetch(url);
+    const datos = await res.json();
+    renderTablaUsuarios(titulo, datos, rol);
+  } catch (error) {
+    console.error('❌ Error al recargar la tabla:', error);
+    Swal.fire('Error', 'No se pudo actualizar la tabla.', 'error');
+  }
+}
+
+/* =========================
+   TABLAS DINÁMICAS
+========================= */
+function renderTablaUsuarios(titulo, datos, rol) {
+  const cont = document.getElementById('contenidoPrincipal');
+  if (!datos || datos.length === 0) {
+    cont.innerHTML = `
+      <div class="alert alert-warning text-center mt-5">
+        No hay ${titulo.toLowerCase()} registrados.
+      </div>`;
+    return;
+  }
+
+  cont.innerHTML = `
+  <div class="card shadow-sm border-0 p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-semibold text-dark m-0">
+        <i class="bi ${rol === 'docente' ? 'bi-person-badge' : (rol === 'orientador' ? 'bi-person-heart' : 'bi-person-gear')}"></i>
+        Lista de ${titulo}
+      </h5>
+      <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="${rol === 'docente' ? '#modalAgregarDocente' : (rol === 'orientador' ? '#modalAgregarOrientador' : '#modalAgregarAdministrador')}">
+        <i class="bi bi-person-plus"></i> Agregar
+      </button>
+    </div>
+    <div class="mb-3">
+      <input type="text" class="form-control form-control-sm" id="buscarInput"
+        placeholder="🔍 Buscar por nombre, correo o CSP...">
+    </div>
+    <div class="table-responsive">
+        <table  id="tablaUsuarios" class="table table-bordered align-middle text-center table-custom">
+      <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Nombre completo</th>
+            <th>CSP</th>
+            <th>Correo institucional</th>
+            <th style="width:180px;" class="acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${datos.map((d, i) => `
+            <tr>
+              <td class="fw-semibold">${i + 1}</td>
+              <td>${d.nombre} ${d.apellido_paterno} ${d.apellido_materno}</td>
+              <td>${d.csp || '—'}</td>
+              <td>${d.correo_institucional}</td>
+              <td class="acciones">
+                <button class="btn btn-sm btn-outline-primary me-2 ver-usuario" data-id="${d.id_usuario}" title="Ver más">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-dark me-2 editar-usuario" data-id="${d.id_usuario}" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger eliminar-usuario" data-id="${d.id_usuario}" data-nombre="${d.nombre} ${d.apellido_paterno}" title="Eliminar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+
+  
+
+  /* Filtro búsqueda */
+  const input = document.getElementById('buscarInput');
+  input.addEventListener('keyup', () => {
+    const value = input.value.toLowerCase();
+    document.querySelectorAll('#tablaUsuarios tbody tr').forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(value) ? '' : 'none';
+    });
+  });
+
+  /* Eventos Ver / Editar / Eliminar */
+  document.querySelectorAll('.ver-usuario').forEach(btn => btn.addEventListener('click', verUsuario));
+  document.querySelectorAll('.editar-usuario').forEach(btn => btn.addEventListener('click', editarUsuario));
+  document.querySelectorAll('.eliminar-usuario').forEach(btn => btn.addEventListener('click', eliminarUsuario));
+}
+
+/* =========================
+   VER USUARIO
+========================= */
+async function verUsuario(e) {
+  const id = e.currentTarget.dataset.id;
+  const res = await fetch(`/ver_usuario/${id}`);
+  const usuario = await res.json();
+
+  if (usuario && usuario.id_usuario) {
+    document.getElementById('verNombreUsuario').textContent = `${usuario.nombre} ${usuario.apellido_paterno} ${usuario.apellido_materno}`;
+    document.getElementById('verRolUsuario').textContent = usuario.rol;
+    document.getElementById('verCorreoUsuario').textContent = usuario.correo_institucional;
+    document.getElementById('verCspUsuario').textContent = usuario.csp || '—';
+
+    const asignacionesDiv = document.getElementById('verAsignaciones');
+    asignacionesDiv.innerHTML = '';
+    if (usuario.asignaciones && usuario.asignaciones.length > 0) {
+      asignacionesDiv.innerHTML = '<h6 class="fw-semibold mt-3">Grupos y materias asignadas:</h6><ul>';
+      usuario.asignaciones.forEach(a => {
+        asignacionesDiv.innerHTML += `<li><strong>${a.nombre_materia}</strong> — ${a.nombre_grupo}</li>`;
+      });
+      asignacionesDiv.innerHTML += '</ul>';
+    }
+
+    showModal('modalVerUsuario');
+  }
+}
+
+/* =========================
+   EDITAR USUARIO
+========================= */
+async function editarUsuario(e) {
+  const id = e.currentTarget.dataset.id;
+  const res = await fetch(`/ver_usuario/${id}`);
+  const usuario = await res.json();
+
+  if (usuario && usuario.id_usuario) {
+    document.getElementById('editarIdUsuario').value = usuario.id_usuario;
+    document.getElementById('editarNombre').value = usuario.nombre;
+    document.getElementById('editarApellidoPaterno').value = usuario.apellido_paterno;
+    document.getElementById('editarApellidoMaterno').value = usuario.apellido_materno;
+    document.getElementById('editarCsp').value = usuario.csp || '';
+    document.getElementById('editarCorreo').value = usuario.correo_institucional;
+    showModal('modalEditarUsuario');
+  }
+}
+
+/* Guardar edición */
+document.getElementById('formEditarUsuario').addEventListener('submit', async e => {
+  e.preventDefault();
+  const id = document.getElementById('editarIdUsuario').value;
+  const data = {
+    nombre: document.getElementById('editarNombre').value,
+    apellido_paterno: document.getElementById('editarApellidoPaterno').value,
+    apellido_materno: document.getElementById('editarApellidoMaterno').value,
+    csp: document.getElementById('editarCsp').value,
+    correo_institucional: document.getElementById('editarCorreo').value
+  };
+
+  const res = await fetch(`/actualizar_usuario/${id}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  const result = await res.json();
+  if (result.status === 'success') {
+    hideModal('modalEditarUsuario');
+    Swal.fire('Actualizado', result.message, 'success').then(() => location.reload());
+  } else {
+    Swal.fire('Error', result.message, 'error');
+  }
+});
+
+/* =========================
+   ELIMINAR USUARIO — Detecta rol automáticamente
+========================= */
+function eliminarUsuario(e) {
+  const id = e.currentTarget.dataset.id;
+  const nombre = e.currentTarget.dataset.nombre;
+  document.getElementById('eliminarNombre').textContent = nombre;
+
+  // 🔍 Detectar automáticamente qué rol se está mostrando actualmente
+  let rolActual = null;
+  const tituloTabla = document.querySelector('#contenidoPrincipal h5');
+  if (tituloTabla) {
+    const texto = tituloTabla.textContent.toLowerCase();
+    if (texto.includes('docente')) rolActual = 'docente';
+    else if (texto.includes('orientador')) rolActual = 'orientador';
+    else if (texto.includes('administrador')) rolActual = 'administrador';
+  }
+
+  document.getElementById('btnConfirmarEliminar').onclick = async () => {
+    const res = await fetch(`/eliminar_usuario/${id}`, { method: 'DELETE' });
+    const result = await res.json();
+    hideModal('modalEliminarUsuario');
+
+    if (result.status === 'success') {
+      Swal.fire({
+        icon: 'success',
+        title: 'Eliminado',
+        text: result.message,
+        confirmButtonColor: '#2E343D'
+      }).then(() => {
+        if (rolActual) {
+          recargarTablaUsuarios(rolActual); // ✅ Se queda en la tabla actual
+        } else {
+          location.reload(); // fallback por si acaso
+        }
+      });
+    } else {
+      Swal.fire('Error', result.message, 'error');
+    }
+  };
+
+  showModal('modalEliminarUsuario');
+}
+
+/* =========================
+   EVENTOS DE MENÚ
+========================= */
+document.getElementById('menuDocentes').addEventListener('click', async e => {
+  e.preventDefault();
+  const res = await fetch('/listar_docentes');
+  const datos = await res.json();
+  renderTablaUsuarios('Docentes', datos, 'docente');
+});
+document.getElementById('menuOrientadores').addEventListener('click', async e => {
+  e.preventDefault();
+  const res = await fetch('/listar_orientadores');
+  const datos = await res.json();
+  renderTablaUsuarios('Orientadores', datos, 'orientador');
+});
+document.getElementById('menuAdministradores').addEventListener('click', async e => {
+  e.preventDefault();
+  const res = await fetch('/listar_administradores');
+  const datos = await res.json();
+  renderTablaUsuarios('Administradores', datos, 'administrador');
+});
+
+/* =========================
+   ASIGNAR MATERIA
+========================= */
+document.getElementById('formAsignarMateria').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target;
+  const data = Object.fromEntries(new FormData(f));
+  const result = await postJSON('/asignar_materia_grupo', data);
+  if (result.status === 'success') {
+    hideModal('modalAsignarMateria');
+    Swal.fire('Éxito', result.message, 'success').then(() => location.reload());
+  } else {
+    Swal.fire('Error', result.message, 'error');
+  }
+});
+
+
+/* =========================
+   CARGAR MATERIAS, GRUPOS Y DOCENTES POR GRADO
+========================= */
+document.addEventListener('DOMContentLoaded', () => {
+  const gradoSelect = document.getElementById('selectGrado');
+  const materiaSelect = document.getElementById('selectMateria');
+  const grupoSelect = document.getElementById('selectGrupo');
+  const docenteSelect = document.getElementById('id_docente');
+
+  if (!gradoSelect || !materiaSelect || !grupoSelect || !docenteSelect) return;
+
+  // 🔹 Cuando se selecciona un grado → cargar materias y grupos
+  gradoSelect.addEventListener('change', async (e) => {
+    const grado = e.target.value;
+    if (!grado) return;
+
+    try {
+      const [materiasRes, gruposRes] = await Promise.all([
+        fetch(`/materias_por_grado/${grado}`),
+        fetch(`/grupos_por_grado/${grado}`)
+      ]);
+
+      const materias = await materiasRes.json();
+      const grupos = await gruposRes.json();
+
+      // Limpiar selects
+      materiaSelect.innerHTML = '<option value="">Seleccionar materia</option>';
+      grupoSelect.innerHTML = '<option value="">Seleccionar grupo</option>';
+      docenteSelect.innerHTML = '<option value="">Seleccionar responsable</option>';
+
+      // Llenar materias
+      materias.forEach(m => {
+        materiaSelect.innerHTML += `<option value="${m.id_materia}">${m.nombre_materia}</option>`;
+      });
+
+      // Llenar grupos
+      grupos.forEach(g => {
+        grupoSelect.innerHTML += `<option value="${g.id_grupo}">${g.nombre_grupo}</option>`;
+      });
+
+    } catch (error) {
+      console.error("❌ Error al cargar materias o grupos:", error);
+      Swal.fire("Error", "No se pudieron cargar las materias o grupos.", "error");
+    }
+  });
+
+  // 🔹 Texto informativo bajo el selector de docente
+  const infoText = document.createElement('small');
+  infoText.id = 'docenteInfo';
+  infoText.className = 'text-muted fst-italic d-block mt-1';
+  docenteSelect.parentNode.appendChild(infoText);
+
+  // 🔹 Cuando cambie la materia → decidir quiénes se muestran en el select de docente
+  materiaSelect.addEventListener('change', async (e) => {
+    const nombreMateria = e.target.options[e.target.selectedIndex].text.toLowerCase();
+    docenteSelect.innerHTML = '<option value="">Cargando...</option>';
+    infoText.textContent = '';
+
+    try {
+      let lista = [];
+
+      if (nombreMateria.includes('orientación')) {
+        // 🧭 Solo orientadores si es materia de orientación educativa
+        console.log("🎓 Materia de orientación educativa: mostrando solo orientadores");
+        const res = await fetch('/listar_orientadores');
+        lista = await res.json();
+        infoText.textContent = "Mostrando solo orientadores (materia de orientación educativa)";
+      } else {
+        // 📘 Materias normales: mostrar docentes + orientadores
+        console.log("📚 Materia normal: mostrando docentes + orientadores");
+        const [docentesRes, orientadoresRes] = await Promise.all([
+          fetch('/listar_docentes'),
+          fetch('/listar_orientadores')
+        ]);
+
+        const docentes = await docentesRes.json();
+        const orientadores = await orientadoresRes.json();
+
+        // Agregamos la etiqueta solo a orientadores
+        orientadores.forEach(o => o.etiqueta = " (Orientador)");
+
+        lista = [...docentes, ...orientadores];
+        infoText.textContent = "Mostrando docentes y orientadores disponibles";
+      }
+
+      // 🧾 Llenar el select
+      docenteSelect.innerHTML = '<option value="">Seleccionar responsable</option>';
+      if (lista && lista.length > 0) {
+        lista.forEach(p => {
+          const etiqueta = p.etiqueta || '';
+          docenteSelect.innerHTML += `
+            <option value="${p.id_usuario}">
+              ${p.nombre} ${p.apellido_paterno} ${p.apellido_materno}${etiqueta}
+            </option>`;
+        });
+      } else {
+        docenteSelect.innerHTML = '<option value="">Sin responsables disponibles</option>';
+        infoText.textContent = "No hay docentes ni orientadores registrados.";
+      }
+
+    } catch (error) {
+      console.error("❌ Error al cargar personal:", error);
+      docenteSelect.innerHTML = '<option value="">Error al cargar</option>';
+      infoText.textContent = "Ocurrió un error al obtener la lista.";
+    }
+  });
+});
+
+
+// =========================
+// CLICK EN TARJETA DE GRUPO (ver estudiantes y detalles)
+// =========================
+document.querySelectorAll('.grupo-card').forEach(card => {
+  card.addEventListener('click', async () => {
+    const id = card.dataset.id;
+    const grupoNombre = card.querySelector('h6').innerText;
+    const cont = document.getElementById('contenidoPrincipal');
+
+    const res = await fetch(`/admin/grupo/${id}`);
+    const data = await res.json();
+
+    if (data.status === "success") {
+      let html = `
+      <div class="card p-4 fade-in shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-semibold text-dark mb-0">
+            <i class="bi bi-people-fill me-2"></i> ${grupoNombre}
+          </h5>
+          <button class="btn btn-outline-secondary btn-sm" id="volverDashboard">
+            <i class="bi bi-arrow-left"></i> Volver
+          </button>
+        </div>
+        <div class="table-responsive">
+              <table class="table table-bordered align-middle text-center table-custom">
+          <thead>
+              <tr>
+                <th>N.P.</th>
+                <th>Nombre</th>
+                <th class="acciones">Estado</th>
+                <th class="acciones">Detalle</th>
+              </tr>
+            </thead>
+            <tbody>`;
+
+      data.estudiantes.forEach((e, i) => {
+        html += `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${e.nombre_completo}</td>
+            <td class="acciones"><span class="badge bg-${e.color}">${e.estado}</span></td>
+            <td class="acciones">
+              <button class="btn btn-outline-dark btn-sm ver-detalle" 
+                      data-id="${e.id_estudiante}" 
+                      data-grupo="${id}">
+                <i class="bi bi-search"></i>
+              </button>
+            </td>
+          </tr>`;
+      });
+
+      html += `
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+
+      cont.innerHTML = html;
+
+      // Volver al panel principal
+      document.getElementById('volverDashboard').addEventListener('click', () => location.reload());
+
+      // Click en "Ver detalle" (materias del estudiante)
+      document.querySelectorAll('.ver-detalle').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const idEst = btn.dataset.id;
+          const idGrp = btn.dataset.grupo;
+
+          const res2 = await fetch(`/admin/estudiante/${idEst}/${idGrp}`);
+          const data2 = await res2.json();
+
+          if (data2.status === "success") {
+            let html2 = `
+              <button class="btn btn-outline-secondary mb-3" id="volverGrupo">
+                <i class="bi bi-arrow-left"></i> Volver al grupo
+              </button>
+              <div class="fade-in">
+              <table class="table table-bordered align-middle text-center table-custom">
+                <thead>
+                  <tr>
+                    <th>Materia</th>
+                    <th>Trabajos</th>
+                    <th>Entregados</th>
+                    <th>Pendientes</th>
+                    <th class="acciones">Estado</th>
+                    <th class="acciones">Ver</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+
+            for (const [materia, info] of Object.entries(data2.materias)) {
+              const parciales = info.trabajos_por_parcial || {};
+              const total = Object.values(parciales).flat().length;
+              const entregados = Object.values(parciales).flat().filter(t => t.entregado || t.justificado || t.suspension).length;
+              const pendientes = total - entregados;
+
+              html2 += `
+                <tr>
+                  <td class="text-start">${info.nombre}</td>
+                  <td>${total}</td>
+                  <td>${entregados}</td>
+                  <td>${pendientes}</td>
+                  <td class="acciones"><span class="badge bg-${info.color}">${info.estado}</span></td>
+                  <td class="acciones"><i class="bi bi-eye text-dark ver-materia" 
+                        data-nombre="${info.nombre}" 
+                        data-idest="${idEst}" 
+                        data-idg="${idGrp}" 
+                        style="cursor:pointer;"></i></td>
+                </tr>`;
+            }
+
+            html2 += `</tbody></table></div>`;
+
+// 🧹 Antes de cargar nueva vista, aseguramos que no haya modales abiertos ni fondos grises
+document.querySelectorAll('.modal.show').forEach(m => {
+  const modal = bootstrap.Modal.getInstance(m);
+  if (modal) modal.hide(); // Cierra cualquier modal activo
+});
+
+// 🧽 Elimina manualmente cualquier fondo gris del modal (bug de Bootstrap al reemplazar HTML)
+document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+
+// 🧩 Ahora sí reemplazamos el contenido principal con la tabla de materias del estudiante
+cont.innerHTML = html2;
+
+// 🔙 Evento para volver a la lista del grupo (reutiliza el click original del grupo)
+document.getElementById('volverGrupo').addEventListener('click', () => card.click());
+
+
+            // Volver a lista del grupo
+            document.getElementById('volverGrupo').addEventListener('click', () => card.click());
+          } else {
+            Swal.fire("Error", "No se pudo obtener la información del estudiante.", "error");
+          }
+        });
+      });
+
+
+      // Click en el ojito de "ver materia"
+document.addEventListener('click', async (e) => {
+  if (e.target.classList.contains('ver-materia')) {
+    const nombre = e.target.dataset.nombre;
+    const idE = e.target.dataset.idest;
+    const idG = e.target.dataset.idg;
+
+    // 🧹 Limpieza previa antes de abrir modal nuevo
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    document.body.classList.remove('modal-open');
+
+    // 🕐 Pequeña pausa antes de abrir (evita error de Bootstrap y pantalla gris)
+    setTimeout(() => {
+      const modal = new bootstrap.Modal(document.getElementById('modalMateria'));
+      modal.show();
+    }, 100);
+
+    document.getElementById('modalContenido').innerHTML =
+      '<div class="text-center py-5 text-secondary"><div class="spinner-border text-dark"></div><br>Cargando trabajos...</div>';
+
+          const res3 = await fetch(`/admin/estudiante/${idE}/${idG}`);
+          const data3 = await res3.json();
+
+          if (data3.status === "success") {
+            const materia = data3.materias[nombre];
+            if (!materia) return;
+
+            let htmlModal = `<h5 class="fw-semibold mb-3 text-dark">${materia.nombre}</h5>
+              <div class="accordion" id="acParciales">`;
+
+            Object.entries(materia.trabajos_por_parcial).forEach(([parcial, lista], i) => {
+              const idCollapse = `p${i}`;
+              htmlModal += `
+                <div class="accordion-item mb-2">
+                  <h2 class="accordion-header" id="h${idCollapse}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${idCollapse}">
+                      ${parcial} Parcial (${lista.length} trabajo${lista.length !== 1 ? 's' : ''})
+                    </button>
+                  </h2>
+                  <div id="${idCollapse}" class="accordion-collapse collapse" data-bs-parent="#acParciales">
+                    <div class="accordion-body">`;
+
+              if (lista.length === 0) {
+                htmlModal += `<div class="text-center text-muted py-2">🗂️ Sin trabajos registrados en este parcial</div>`;
+              } else {
+                htmlModal += `<div class="table-responsive">
+                  <table class="table table-bordered table-sm text-center align-middle table-custom mb-0">
+                    <thead>
+                      <tr>
+                        <th>Semana</th><th>Título</th><th>Valor</th><th>Calificación</th><th>Entregado</th><th>Observación</th>
+                      </tr>
+                    </thead>
+                    <tbody>`;
+
+                lista.forEach(t => {
+                  const cal = t.calificacion !== null ? parseFloat(t.calificacion).toFixed(1) : '—';
+                  const ent = t.entregado ? '<i class="bi bi-check-circle text-success"></i>' : '<i class="bi bi-x-circle text-danger"></i>';
+                  htmlModal += `<tr>
+                    <td>${t.semana || ''}</td>
+                    <td>${t.titulo || ''}</td>
+                    <td>${t.valor_maximo || ''}</td>
+                    <td>${cal}</td>
+                    <td>${ent}</td>
+                    <td>${t.observacion || ''}</td>
+                  </tr>`;
+                });
+
+                htmlModal += `</tbody></table></div>`;
+              }
+
+              htmlModal += `</div></div></div>`;
+            });
+
+            htmlModal += `</div>`;
+            document.getElementById('modalContenido').innerHTML = htmlModal;
+          }
+        }
+      });
+    } else {
+      Swal.fire("Error", "No se pudo obtener la información del grupo.", "error");
+    }
+  });
+});
+
+
+/* ==========================================================
+   🔹 GESTIÓN DE ESTUDIANTES — INTEGRACIÓN COMPLETA
+   (No interfiere con trabajos, materias ni usuarios)
+========================================================== */
+
+// =========================
+// Abrir vista de grupos desde menú "Estudiantes"
+// =========================
+document.getElementById('menuEstudiantes').addEventListener('click', async e => {
+  e.preventDefault();
+
+  const cont = document.getElementById('contenidoPrincipal');
+  cont.innerHTML = `
+    <div class="text-center my-5">
+      <div class="spinner-border text-dark"></div><br>
+      Cargando grupos...
+    </div>`;
+
+  const res = await fetch('/admin');
+  const text = await res.text();
+  const parser = new DOMParser();
+  const htmlDoc = parser.parseFromString(text, 'text/html');
+  const grupos = JSON.parse(htmlDoc.querySelector('script[data-grupos]')?.textContent || '[]');
+
+  if (!grupos.length && !Array.isArray(grupos)) {
+    Swal.fire("Error", "No se pudieron cargar los grupos.", "error");
+    return;
+  }
+
+  cont.innerHTML = `
+    <div class="card p-4 shadow-sm border-0">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-semibold text-dark m-0"><i class="bi bi-people-fill me-2"></i> Gestión de Estudiantes por Grupo</h5>
+      </div>
+      <div class="row" id="gruposEstudiantes">
+        ${grupos.map(g => `
+          <div class="col-md-4 mb-4">
+            <div class="card p-3 border-0 shadow-sm grupo-card-est" data-id="${g.id_grupo}" style="cursor:pointer;">
+              <h6 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-people-fill me-2 text-secondary"></i> ${g.nombre_grupo}
+              </h6>
+              <hr class="my-2">
+              <p class="mb-1"><strong>Total estudiantes:</strong> ${g.total_estudiantes}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+
+  document.querySelectorAll('.grupo-card-est').forEach(card => {
+    card.addEventListener('click', () => verEstudiantesPorGrupo(card.dataset.id, card.querySelector('h6').innerText));
+  });
+});
+
+
+// =========================
+// VARIABLES GLOBALES
+// =========================
+let grupoActualId = null;
+// =========================
+// Ver estudiantes de un grupo
+// =========================
+async function verEstudiantesPorGrupo(idGrupo, nombreGrupo) {
+   grupoActualId = idGrupo;
+  const cont = document.getElementById('contenidoPrincipal');
+  cont.innerHTML = `
+    <div class="text-center my-5">
+      <div class="spinner-border text-dark"></div><br>
+      Cargando estudiantes del grupo ${nombreGrupo}...
+    </div>`;
+
+  const res = await fetch(`/admin/grupo/${idGrupo}`);
+  const data = await res.json();
+
+  if (data.status !== "success") {
+    Swal.fire("Error", "No se pudieron obtener los estudiantes del grupo.", "error");
+    return;
+  }
+
+  const estudiantes = data.estudiantes;
+  let html = `
+  <div class="card p-4 shadow-sm border-0">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-semibold text-dark mb-0"><i class="bi bi-people-fill me-2"></i> ${nombreGrupo}</h5>
+      <div>
+        <button class="btn btn-dark btn-sm me-2" data-bs-toggle="modal" data-bs-target="#modalAgregarEstudiante">
+          <i class="bi bi-person-plus"></i> Agregar estudiante
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" id="volverGruposEst">
+          <i class="bi bi-arrow-left"></i> Volver
+        </button>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered tabla-estudiantes align-middle text-center">
+        <thead>
+          <tr>
+            <th>N.P.</th>
+            <th>Nombre completo</th>
+            <th>Sexo</th>
+            <th>Correo institucional</th>
+            <th class="acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${estudiantes.map((e, i) => `
+            <tr>
+              <td>${e.numero_lista}</td>
+              <td>${e.nombre_completo}</td>
+              <td class="col-sexo">${e.sexo || '—'}</td>
+
+              <td>${e.correo_institucional || '—'}</td>
+              <td class="acciones">
+                <button class="btn btn-outline-dark btn-sm editar-est" data-id="${e.id_estudiante}">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm eliminar-est" data-id="${e.id_estudiante}" data-nombre="${e.nombre_completo}">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+
+  cont.innerHTML = html;
+
+  document.getElementById('volverGruposEst').addEventListener('click', () => document.getElementById('menuEstudiantes').click());
+  document.querySelectorAll('.editar-est').forEach(btn => btn.addEventListener('click', editarEstudiante));
+  document.querySelectorAll('.eliminar-est').forEach(btn => btn.addEventListener('click', eliminarEstudiante));
+}
+
+
+// =========================
+// Agregar estudiante (VALIDADO COMPLETO)
+// =========================
+document.getElementById('formAgregarEstudiante').addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+
+  // === Expresiones regulares ===
+  const nombreRegex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ\s]{2,50}$/;
+  const telefonoRegex = /^[0-9]{10}$/;
+  const correoRegex = /^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  const curpRegex = /^[A-Z]{4}\d{6}[A-Z]{6}[A-Z0-9]{2}$/i;// Formato oficial CURP (18 chars)
+
+  // === Validaciones ===
+
+  // Expediente
+  if (!data.exp || data.exp.trim().length < 3) {
+    return Swal.fire("Error", "Debes ingresar un número de expediente válido (mínimo 3 caracteres).", "error");
+  }
+
+  // Nombre
+  if (!nombreRegex.test(data.nombre.trim())) {
+    return Swal.fire("Error", "El nombre debe tener solo letras y al menos 2 caracteres.", "error");
+  }
+
+  // Apellido paterno
+  if (!nombreRegex.test(data.apellido_paterno.trim())) {
+    return Swal.fire("Error", "El apellido paterno solo puede contener letras.", "error");
+  }
+
+  // Apellido materno
+  if (!nombreRegex.test(data.apellido_materno.trim())) {
+    return Swal.fire("Error", "El apellido materno solo puede contener letras.", "error");
+  }
+
+  // Sexo
+  if (!data.sexo) {
+    return Swal.fire("Error", "Debes seleccionar el sexo del estudiante.", "error");
+  }
+
+  // CURP (si se escribió)
+  if (data.curp && !curpRegex.test(data.curp.trim())) {
+    return Swal.fire("Error", "La CURP no tiene un formato válido (18 caracteres alfanuméricos).", "error");
+  }
+
+  // Teléfono (si se escribió)
+  if (data.telefono && !telefonoRegex.test(data.telefono.trim())) {
+    return Swal.fire("Error", "El teléfono debe tener exactamente 10 dígitos numéricos.", "error");
+  }
+
+  // Correo
+  if (!correoRegex.test(data.correo_institucional.trim())) {
+    return Swal.fire("Error", "Por favor ingresa un correo institucional válido.", "error");
+  }
+
+  // ✅ Si todo pasa, continúa con el envío
+  data.id_grupo = grupoActualId;
+  const res = await postJSON('/admin/agregar_estudiante', data);
+
+  if (res.status === 'success') {
+    hideModal('modalAgregarEstudiante');
+    Swal.fire('Éxito', res.message, 'success').then(() => location.reload());
+  } else {
+    Swal.fire('Error', res.message, 'error');
+  }
+});
+
+
+// =========================
+// Editar estudiante
+// =========================
+async function editarEstudiante(e) {
+  const id = e.currentTarget.dataset.id;
+  const res = await fetch(`/admin/ver_estudiante/${id}`);
+  const est = await res.json();
+
+  if (est.status !== "success") return Swal.fire("Error", "No se pudo cargar el estudiante", "error");
+
+  const eData = est.data;
+  document.getElementById('editarIdEstudiante').value = eData.id_estudiante;
+  document.getElementById('editarNombreEst').value = eData.nombre;
+  document.getElementById('editarApellidoPaternoEst').value = eData.apellido_paterno;
+  document.getElementById('editarApellidoMaternoEst').value = eData.apellido_materno;
+  document.getElementById('editarSexoEst').value = eData.sexo;
+  document.getElementById('editarCurpEst').value = eData.curp || '';
+  document.getElementById('editarTelefonoEst').value = eData.telefono || '';
+  document.getElementById('editarCorreoEst').value = eData.correo_institucional || '';
+  showModal('modalEditarEstudiante');
+}
+
+
+// Guardar edición estudiante con validaciones
+// =========================
+document.getElementById('formEditarEstudiante').addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+
+  // === Expresiones regulares ===
+  const nombreRegex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ\s]{2,50}$/;
+  const telefonoRegex = /^[0-9]{10}$/;
+  const correoRegex = /^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  const curpRegex = /^[A-Z]{4}\d{6}[A-Z]{6}[A-Z0-9]{2}$/i; // Formato oficial CURP (18 chars)
+
+  // === Validaciones ===
+
+  if (!nombreRegex.test(data.nombre.trim())) {
+    return Swal.fire("Error", "El nombre debe tener solo letras y al menos 2 caracteres.", "error");
+  }
+
+  if (!nombreRegex.test(data.apellido_paterno.trim())) {
+    return Swal.fire("Error", "El apellido paterno solo puede contener letras.", "error");
+  }
+
+  if (!nombreRegex.test(data.apellido_materno.trim())) {
+    return Swal.fire("Error", "El apellido materno solo puede contener letras.", "error");
+  }
+
+  if (!data.sexo) {
+    return Swal.fire("Error", "Debes seleccionar el sexo del estudiante.", "error");
+  }
+
+  if (data.curp && !curpRegex.test(data.curp.trim())) {
+    return Swal.fire("Error", "La CURP no tiene un formato válido (18 caracteres alfanuméricos).", "error");
+  }
+
+  if (data.telefono && !telefonoRegex.test(data.telefono.trim())) {
+    return Swal.fire("Error", "El teléfono debe tener exactamente 10 dígitos numéricos.", "error");
+  }
+
+  if (!correoRegex.test(data.correo_institucional.trim())) {
+    return Swal.fire("Error", "Por favor ingresa un correo institucional válido.", "error");
+  }
+
+  // ✅ Si todo está correcto, se envía la edición
+  const res = await postJSON(`/admin/editar_estudiante/${data.id_estudiante}`, data);
+  if (res.status === 'success') {
+    hideModal('modalEditarEstudiante');
+    Swal.fire('Actualizado', res.message, 'success').then(() => location.reload());
+  } else {
+    Swal.fire('Error', res.message, 'error');
+  }
+});
+
+
+
+// =========================
+// Eliminar estudiante
+// =========================
+function eliminarEstudiante(e) {
+  const id = e.currentTarget.dataset.id;
+  const nombre = e.currentTarget.dataset.nombre;
+  document.getElementById('nombreEliminarEst').textContent = nombre;
+  document.getElementById('btnConfirmarEliminarEst').onclick = async () => {
+    const res = await fetch(`/admin/eliminar_estudiante/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    hideModal('modalEliminarEstudiante');
+    if (data.status === 'success') {
+      Swal.fire('Eliminado', data.message, 'success').then(() => location.reload());
+    } else {
+      Swal.fire('Error', data.message, 'error');
+    }
+  };
+  showModal('modalEliminarEstudiante');
+}
+
+
+/* =========================
+   LIMPIEZA GLOBAL DE MODALES (para evitar fondo gris pegado)
+========================= */
+
+// 🔁 Cada vez que se cierre un modal, se eliminan backdrop o residuos visuales
+document.addEventListener('hidden.bs.modal', function () {
+  document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = ''; // reactivar scroll
+  document.body.style.paddingRight = '';
+});
+
+// 🚨 Si hay algún modal bloqueado (bug al cambiar vistas), lo limpiamos
+document.addEventListener('click', function () {
+  const backdrops = document.querySelectorAll('.modal-backdrop');
+  if (backdrops.length > 1) {
+    backdrops.forEach((b, i) => { if (i < backdrops.length - 1) b.remove(); });
+  }
+});
+
+
+
+// =========================
+// Validaciones visuales en tiempo real
+// =========================
+document.addEventListener("DOMContentLoaded", () => {
+
+  // --- CURP ---
+  const curpInput = document.querySelector('input[name="curp"]');
+  const curpRegex = /^[A-Z]{4}\d{6}[A-Z]{6}[A-Z0-9]{2}$/i;
+  if (curpInput) {
+    curpInput.addEventListener("input", () => {
+      const valor = curpInput.value.trim().toUpperCase();
+      curpInput.value = valor; // siempre en mayúsculas
+
+      if (!valor) {
+        curpInput.classList.remove("is-valid", "is-invalid");
+        return;
+      }
+      if (curpRegex.test(valor)) {
+        curpInput.classList.add("is-valid");
+        curpInput.classList.remove("is-invalid");
+      } else {
+        curpInput.classList.add("is-invalid");
+        curpInput.classList.remove("is-valid");
+      }
+    });
+  }
+
+  // --- Teléfono ---
+  const telInput = document.querySelector('input[name="telefono"]');
+  const telRegex = /^[0-9]{10}$/;
+  if (telInput) {
+    telInput.addEventListener("input", () => {
+      const valor = telInput.value.trim();
+      if (!valor) {
+        telInput.classList.remove("is-valid", "is-invalid");
+        return;
+      }
+      if (telRegex.test(valor)) {
+        telInput.classList.add("is-valid");
+        telInput.classList.remove("is-invalid");
+      } else {
+        telInput.classList.add("is-invalid");
+        telInput.classList.remove("is-valid");
+      }
+    });
+  }
+
+  // --- Correo ---
+  const emailInput = document.querySelector('input[name="correo_institucional"]');
+  const emailRegex = /^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  if (emailInput) {
+    emailInput.addEventListener("input", () => {
+      const valor = emailInput.value.trim();
+      if (!valor) {
+        emailInput.classList.remove("is-valid", "is-invalid");
+        return;
+      }
+      if (emailRegex.test(valor)) {
+        emailInput.classList.add("is-valid");
+        emailInput.classList.remove("is-invalid");
+      } else {
+        emailInput.classList.add("is-invalid");
+        emailInput.classList.remove("is-valid");
+      }
+    });
+  }
+});
+
+
+// =========================
+// Validaciones en tiempo real para el modal de EDITAR estudiante
+// =========================
+document.addEventListener("DOMContentLoaded", () => {
+  const curpEdit = document.querySelector('#editarCurpEst');
+  const telEdit = document.querySelector('#editarTelefonoEst');
+  const emailEdit = document.querySelector('#editarCorreoEst');
+  const nombreEdit = document.querySelector('#editarNombreEst');
+  const paternoEdit = document.querySelector('#editarApellidoPaternoEst');
+  const maternoEdit = document.querySelector('#editarApellidoMaternoEst');
+
+  const nombreRegex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ\s]{2,50}$/;
+  const curpRegex = /^[A-Z]{4}\d{6}[A-Z]{6}[A-Z0-9]{2}$/i;
+  const telRegex = /^[0-9]{10}$/;
+  const emailRegex = /^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+  function validarCampo(input, regex) {
+    const valor = input.value.trim();
+    if (!valor) {
+      input.classList.remove("is-valid", "is-invalid");
+      return;
+    }
+    if (regex.test(valor)) {
+      input.classList.add("is-valid");
+      input.classList.remove("is-invalid");
+    } else {
+      input.classList.add("is-invalid");
+      input.classList.remove("is-valid");
+    }
+  }
+
+  [nombreEdit, paternoEdit, maternoEdit].forEach(inp =>
+    inp?.addEventListener("input", () => validarCampo(inp, nombreRegex))
+  );
+  curpEdit?.addEventListener("input", () => validarCampo(curpEdit, curpRegex));
+  telEdit?.addEventListener("input", () => validarCampo(telEdit, telRegex));
+  emailEdit?.addEventListener("input", () => validarCampo(emailEdit, emailRegex));
+});
+
+
+// =========================
+// VALIDACIONES DE USUARIOS (Docente / Orientador / Administrador)
+// =========================
+document.addEventListener("DOMContentLoaded", () => {
+
+  const nombreRegex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ\s]{2,50}$/;
+  const cspRegex = /^[0-9]{9}$/; // CSP = 9 dígitos
+  const correoRegex = /^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  const passRegex = /^.{6,}$/; // Mínimo 6 caracteres
+
+  // Función genérica para validar
+  function validarCampo(input, regex) {
+    const valor = input.value.trim();
+    if (!valor) {
+      input.classList.remove("is-valid", "is-invalid");
+      return false;
+    }
+    if (regex.test(valor)) {
+      input.classList.add("is-valid");
+      input.classList.remove("is-invalid");
+      return true;
+    } else {
+      input.classList.add("is-invalid");
+      input.classList.remove("is-valid");
+      return false;
+    }
+  }
+
+  // =========================
+  // AGREGAR USUARIOS — VALIDACIONES VISUALES
+  // =========================
+  document.querySelectorAll('#modalAgregarDocente input, #modalAgregarOrientador input, #modalAgregarAdministrador input').forEach(input => {
+    const name = input.name;
+    if (name === "nombre" || name === "apellido_paterno" || name === "apellido_materno") {
+      input.addEventListener("input", () => validarCampo(input, nombreRegex));
+    } else if (name === "csp") {
+      input.addEventListener("input", () => validarCampo(input, cspRegex));
+    } else if (name === "correo_institucional") {
+      input.addEventListener("input", () => validarCampo(input, correoRegex));
+    } else if (name === "password" || name === "confirmar_password") {
+      input.addEventListener("input", () => validarCampo(input, passRegex));
+    }
+  });
+
+  // =========================
+  // EDITAR USUARIOS — VALIDACIONES VISUALES
+  // =========================
+  document.querySelectorAll('#modalEditarUsuario input').forEach(input => {
+    const id = input.id;
+    if (id.includes("Nombre") || id.includes("Apellido")) {
+      input.addEventListener("input", () => validarCampo(input, nombreRegex));
+    } else if (id.includes("Csp")) {
+      input.addEventListener("input", () => validarCampo(input, cspRegex));
+    } else if (id.includes("Correo")) {
+      input.addEventListener("input", () => validarCampo(input, correoRegex));
+    }
+  });
+
+// =========================
+// AGREGAR USUARIO — VALIDACIÓN Y REGISTRO COMPLETO (sin recargar toda la página)
+// =========================
+async function validarYGuardarUsuario(form, rol, modalId) {
+  const data = Object.fromEntries(new FormData(form));
+
+  const nombreRegex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ\s]{2,50}$/;
+  const cspRegex = /^[0-9]{9}$/;
+  const correoRegex = /^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  const passRegex = /^.{6,}$/;
+
+  // === Validaciones ===
+  if (!nombreRegex.test(data.nombre.trim()))
+    return Swal.fire("Error", "El nombre debe tener solo letras.", "error");
+  if (!nombreRegex.test(data.apellido_paterno.trim()))
+    return Swal.fire("Error", "El apellido paterno debe tener solo letras.", "error");
+  if (!nombreRegex.test(data.apellido_materno.trim()))
+    return Swal.fire("Error", "El apellido materno debe tener solo letras.", "error");
+  if (data.csp && !cspRegex.test(data.csp.trim()))
+    return Swal.fire("Error", "El CSP debe tener exactamente 9 dígitos numéricos.", "error");
+  if (!correoRegex.test(data.correo_institucional.trim()))
+    return Swal.fire("Error", "Por favor ingresa un correo institucional válido.", "error");
+  if (!passRegex.test(data.password.trim()))
+    return Swal.fire("Error", "La contraseña debe tener al menos 6 caracteres.", "error");
+  if (data.password !== data.confirmar_password)
+    return Swal.fire("Error", "Las contraseñas no coinciden.", "error");
+
+  data.rol = rol;
+
+  // === Validar duplicados antes de enviar ===
+  try {
+    const [adminsRes, docsRes, orisRes] = await Promise.all([
+      fetch('/listar_administradores'),
+      fetch('/listar_docentes'),
+      fetch('/listar_orientadores')
+    ]);
+
+    const admins = await adminsRes.json();
+    const docs = await docsRes.json();
+    const oris = await orisRes.json();
+    const todos = [...admins, ...docs, ...oris];
+
+    const existe = todos.find(u =>
+      u.correo_institucional.trim().toLowerCase() === data.correo_institucional.trim().toLowerCase() ||
+      (data.csp && u.csp && u.csp.trim() === data.csp.trim())
+    );
+
+    if (existe) {
+      return Swal.fire({
+        icon: 'error',
+        title: 'Duplicado detectado',
+        text: 'El correo institucional o el CSP ya están registrados.',
+        confirmButtonColor: '#2E343D'
+      });
+    }
+  } catch (err) {
+    console.error('Error verificando duplicados:', err);
+  }
+
+  // === Enviar datos al backend ===
+  const result = await postJSON('/guardar_usuario', data);
+
+  if (result.status === 'success') {
+    hideModal(modalId);
+    Swal.fire({
+      icon: 'success',
+      title: '✅ Usuario agregado correctamente',
+      text: result.message || 'El usuario fue agregado sin errores.',
+      confirmButtonColor: '#2E343D',
+    }).then(() => recargarTablaUsuarios(rol)); // 🔁 Recarga solo la tabla del rol actual
+  } else {
+    hideModal(modalId);
+    Swal.fire('Error', result.message || 'Ocurrió un error desconocido.', 'error');
+  }
+}
+
+
+// === Asignar evento a cada formulario ===
+const forms = [
+  { id: 'formAgregarDocente', rol: 'docente', modal: 'modalAgregarDocente' },
+  { id: 'formAgregarOrientador', rol: 'orientador', modal: 'modalAgregarOrientador' },
+  { id: 'formAgregarAdministrador', rol: 'administrador', modal: 'modalAgregarAdministrador' }
+];
+
+forms.forEach(({ id, rol, modal }) => {
+  const f = document.getElementById(id);
+  if (f) {
+    f.addEventListener('submit', async e => {
+      e.preventDefault();
+      await validarYGuardarUsuario(f, rol, modal);
+    });
+  }
+});
+
+
+  // =========================
+  // EDITAR USUARIO — VALIDACIÓN AL ENVIAR
+  // =========================
+  const formEditar = document.getElementById('formEditarUsuario');
+  if (formEditar) {
+    formEditar.addEventListener('submit', async e => {
+      e.preventDefault();
+      const data = {
+        nombre: document.getElementById('editarNombre').value,
+        apellido_paterno: document.getElementById('editarApellidoPaterno').value,
+        apellido_materno: document.getElementById('editarApellidoMaterno').value,
+        csp: document.getElementById('editarCsp').value,
+        correo_institucional: document.getElementById('editarCorreo').value
+      };
+      const id = document.getElementById('editarIdUsuario').value;
+
+      if (!nombreRegex.test(data.nombre.trim())) return Swal.fire("Error", "El nombre no es válido.", "error");
+      if (!nombreRegex.test(data.apellido_paterno.trim())) return Swal.fire("Error", "Apellido paterno inválido.", "error");
+      if (!nombreRegex.test(data.apellido_materno.trim())) return Swal.fire("Error", "Apellido materno inválido.", "error");
+      if (data.csp && !cspRegex.test(data.csp.trim())) return Swal.fire("Error", "El CSP debe tener 9 dígitos.", "error");
+      if (!correoRegex.test(data.correo_institucional.trim())) return Swal.fire("Error", "Correo institucional inválido.", "error");
+
+      const res = await fetch(`/actualizar_usuario/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+
+      if (result.status === 'success') {
+        hideModal('modalEditarUsuario');
+        Swal.fire('Actualizado', result.message, 'success').then(() => location.reload());
+      } else {
+        Swal.fire('Error', result.message, 'error');
+      }
+    });
+  }
+});
+
+// =========================
+// Mostrar/Ocultar contraseña 👁️
+// =========================
+function togglePassword(icon) {
+  const input = icon.previousElementSibling;
+  if (input.type === "password") {
+    input.type = "text";
+    icon.classList.remove("bi-eye");
+    icon.classList.add("bi-eye-slash");
+  } else {
+    input.type = "password";
+    icon.classList.remove("bi-eye-slash");
+    icon.classList.add("bi-eye");
+  }
+}
+
+</script>
+</body>
+</html>

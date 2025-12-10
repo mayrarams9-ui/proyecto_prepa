@@ -1,0 +1,182 @@
+<div class="container-fluid mt-4">
+  <h4 class="fw-semibold text-dark mb-4">
+    <i class="bi bi-journal-bookmark me-2"></i> Gestión de Asignaciones por Grupo
+  </h4>
+
+  <!-- 🔹 Nueva Asignación -->
+  <div class="card shadow-sm border-0 mb-4">
+   <div class="card-header fw-semibold text-dark" style="background-color: #fff; color: #2E343D;">
+        <i class="bi bi-plus-circle me-2" style="color: #2E343D;"></i> Nueva Asignación
+    </div>
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Usuario (Docente u Orientador)</label>
+          <select id="nuevoUsuario" class="form-select form-select-sm">
+            <option value="">Seleccionar Usuario</option>
+            {% for u in usuarios %}
+              <option value="{{ u.id_usuario }}">{{ u.nombre_completo|title }} ({{ u.rol|capitalize }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Materia</label>
+          <select id="nuevaMateria" class="form-select form-select-sm">
+            <option value="">Seleccionar Materia</option>
+            {% for m in materias %}
+              <option value="{{ m.id_materia }}">{{ m.nombre_materia|title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Grupo</label>
+          <select id="nuevoGrupo" class="form-select form-select-sm">
+            <option value="">Seleccionar Grupo</option>
+            {% for g in grupos %}
+              <option value="{{ g.id_grupo }}">{{ g.nombre_grupo|upper }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-1 text-center">
+          <button id="btnAgregarAsignacion" class="btn btn-dark btn-sm mt-2" title="Guardar asignación">
+            <i class="bi bi-save"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔹 Listado de Asignaciones -->
+  {% set grupos_unicos = datos|groupby('nombre_grupo') %}
+  {% for grupo, items in grupos_unicos %}
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-light text-dark fw-semibold d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-people-fill me-2"></i>{{ grupo|upper }}</span>
+      <span class="badge bg-secondary">{{ items|length }} Asignaciones</span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle text-center mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Usuario</th>
+              <th>Rol</th>
+              <th>Materia</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fila in items %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td class="text-start">{{ fila.nombre_completo|title }}</td>
+              <td>{{ fila.rol|capitalize }}</td>
+              <td>
+                <select class="form-select form-select-sm materia-select" data-id="{{ fila.id_asignacion }}">
+                  {% for m in materias %}
+                    <option value="{{ m.id_materia }}" {% if m.id_materia == fila.id_materia %}selected{% endif %}>
+                      {{ m.nombre_materia|title }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td class="acciones">
+                <button class="btn btn-sm btn-outline-success guardar" data-id="{{ fila.id_asignacion }}" title="Guardar cambios">
+                  <i class="bi bi-check-circle"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger eliminar" data-id="{{ fila.id_asignacion }}" title="Eliminar asignación">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+/* ===========================
+   Guardar cambios de materia
+=========================== */
+document.querySelectorAll('.guardar').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.dataset.id;
+    const select = document.querySelector(`.materia-select[data-id="${id}"]`);
+    const materia = select.value;
+
+    const res = await fetch(`/actualizar_asignacion/${id}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({materia})
+    });
+    const data = await res.json();
+    Swal.fire({
+      icon: data.status,
+      title: data.status === 'success' ? 'Actualizado' : 'Error',
+      text: data.message,
+      confirmButtonColor: '#2E343D'
+    });
+  });
+});
+
+/* ===========================
+   Eliminar asignación
+=========================== */
+document.querySelectorAll('.eliminar').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.dataset.id;
+    Swal.fire({
+      title: '¿Eliminar Asignación?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d'
+    }).then(async result => {
+      if (result.isConfirmed) {
+        const res = await fetch(`/eliminar_asignacion/${id}`, {method: 'DELETE'});
+        const data = await res.json();
+        Swal.fire({
+          icon: data.status,
+          title: data.status === 'success' ? 'Eliminado' : 'Error',
+          text: data.message,
+          confirmButtonColor: '#2E343D'
+        }).then(() => location.reload());
+      }
+    });
+  });
+});
+
+/* ===========================
+   Agregar nueva asignación
+=========================== */
+document.getElementById('btnAgregarAsignacion').addEventListener('click', async () => {
+  const usuario = document.getElementById('nuevoUsuario').value;
+  const materia = document.getElementById('nuevaMateria').value;
+  const grupo = document.getElementById('nuevoGrupo').value;
+
+  if (!usuario || !materia || !grupo)
+    return Swal.fire('Error', 'Debes seleccionar usuario, materia y grupo', 'error');
+
+  const res = await fetch('/asignar_materia_grupo', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({id_docente: usuario, id_materia: materia, id_grupo: grupo})
+});
+
+  const data = await res.json();
+  Swal.fire({
+    icon: data.status,
+    title: data.status === 'success' ? 'Asignación Agregada' : 'Error',
+    text: data.message,
+    confirmButtonColor: '#2E343D'
+  }).then(() => { if (data.status === 'success') location.reload(); });
+});
+</script>

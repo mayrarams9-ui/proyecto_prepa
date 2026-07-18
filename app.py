@@ -4,18 +4,18 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
 
 
-app = Flask(__name__)
-app.secret_key = 'prepaoficial'
 
-# ╔═══════ Conexion a la base de datos ═══════╗
-# ╚═══════════════════════════════════════════╝
+import os
+import pymysql
+
 def conectar_db():
     try:
         conexion = pymysql.connect(
-            host='localhost',
-            user='root',
-            password='',
-            db='preparatoria_oficial',
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            db=os.getenv("DB_NAME"),
+            port=int(os.getenv("DB_PORT")),
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
         )
@@ -23,6 +23,26 @@ def conectar_db():
     except Exception as e:
         print("Error al conectar a la base de datos:", e)
         return None
+
+#app = Flask(__name__)
+#app.secret_key = 'prepaoficial'
+
+# ╔═══════ Conexion a la base de datos ═══════╗
+# ╚═══════════════════════════════════════════╝
+#def conectar_db():
+   # try:
+      #  conexion = pymysql.connect(
+            #host='localhost',
+            #user='root',
+            #password='',
+            #db='preparatoria_oficial',
+            #charset='utf8mb4',
+            #cursorclass=pymysql.cursors.DictCursor
+        #)
+        #return conexion
+    #except Exception as e:
+     #   print("Error al conectar a la base de datos:", e)
+      #  return None
 
 
 # -----------------------------

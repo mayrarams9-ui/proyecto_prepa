@@ -8,6 +8,9 @@ from datetime import datetime
 import os
 import pymysql
 
+app = Flask(__name__)
+app.secret_key = 'prepaoficial'
+
 def conectar_db():
     try:
         conexion = pymysql.connect(
@@ -25,8 +28,7 @@ def conectar_db():
         print("Error al conectar a la base de datos:", e)
         return None
 
-#app = Flask(__name__)
-#app.secret_key = 'prepaoficial'
+
 
 # ╔═══════ Conexion a la base de datos ═══════╗
 # ╚═══════════════════════════════════════════╝

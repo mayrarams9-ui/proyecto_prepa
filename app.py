@@ -12,11 +12,10 @@ app.secret_key = 'prepaoficial'
 def conectar_db():
     try:
         conexion = pymysql.connect(
-            host='shortline.proxy.rlwy.net',
-            port=51604,
+            host='localhost',
             user='root',
-            password='teUksDwrygYlbFpqXwPfbxHxkhoNXraM',
-            db='railway',
+            password='',
+            db='preparatoria_oficial',
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
         )
